@@ -482,7 +482,7 @@ function Credentials({ lang }: { lang: Lang }) {
         {group.items.map((c) => (
           <li key={c.title}>
             <a href={c.url} target="_blank" rel="noopener noreferrer">
-              <span className="cert-badge" style={{ background: issuerTint[c.issuer] ?? 'var(--ink)' }} aria-hidden>
+              <span className="cert-badge" style={{ background: issuerTint[c.issuer] ?? '#0f766e' }} aria-hidden>
                 {(c.issuer || c.title).replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase()}
               </span>
               <span className="cert-txt">
