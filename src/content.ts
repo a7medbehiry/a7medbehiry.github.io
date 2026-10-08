@@ -210,6 +210,7 @@ export const experience = [
   {
     role: { en: 'Freelance Flutter Developer', ar: 'مطور Flutter فريلانس' },
     org: 'Freelance',
+    start: 202300,
     when: { en: '2023 – present', ar: '2023 – الآن' },
     note: { en: 'Remote · sole developer on client apps', ar: 'عن بُعد · المطور الوحيد في تطبيقات العملاء' },
     points: {
@@ -228,6 +229,7 @@ export const experience = [
   {
     role: { en: 'Mobile Software Engineer', ar: 'مهندس برمجيات موبايل' },
     org: 'Tqnia IT',
+    start: 202410,
     when: { en: 'Oct 2024 – Sep 2026', ar: 'أكتوبر 2024 – سبتمبر 2026' },
     note: { en: 'Full-time · performance recognition', ar: 'دوام كامل · تكريم على الأداء' },
     points: {
@@ -246,6 +248,7 @@ export const experience = [
   {
     role: { en: 'Mobile Application Developer', ar: 'مطور تطبيقات موبايل' },
     org: 'Behiry Perfume',
+    start: 202402,
     when: { en: 'Feb 2024 – present', ar: 'فبراير 2024 – الآن' },
     note: { en: 'Own product', ar: 'منتج خاص' },
     points: {
@@ -256,6 +259,7 @@ export const experience = [
   {
     role: { en: 'Mobile Engineer', ar: 'مهندس موبايل' },
     org: 'Webbing Agency',
+    start: 202408,
     when: { en: 'Aug 2024 – Feb 2025', ar: 'أغسطس 2024 – فبراير 2025' },
     note: { en: 'Best Employee of the Month', ar: 'أفضل موظف في الشهر' },
     points: {

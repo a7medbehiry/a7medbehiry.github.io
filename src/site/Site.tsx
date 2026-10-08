@@ -364,11 +364,19 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
   );
 }
 
+/** Sort key for 'Oct 2024 – …' or '2023 – …'. Parsed by hand: Safari's Date.parse rejects 'Oct 2024'. */
+function startKey(when: string) {
+  const start = when.split(/ [–-] /)[0].trim();
+  const year = Number(start.match(/\d{4}/)?.[0] ?? 0);
+  const m = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(start.slice(0, 3).toLowerCase());
+  return year * 12 + (m < 0 ? 0 : m);
+}
+
 function Journey({ lang }: { lang: Lang }) {
   const t = T(lang);
   const chapters = [
     { year: '2020', label: t('Academic foundation', 'البداية الأكاديمية'), role: t('B.Sc. Computer and Information Technology', 'بكالوريوس حاسبات وتكنولوجيا معلومات'), org: t('Zagazig University', 'جامعة الزقازيق'), when: t('2020 – 2024', '2020 – 2024'), note: t('Arabic native · English excellent · German intermediate', 'العربي اللغة الأم · إنجليزي ممتاز · ألماني متوسط'), points: [t('Studied software engineering and IT, and started building Flutter apps alongside university.', 'درست هندسة البرمجيات وتكنولوجيا المعلومات، وبدأت أبني تطبيقات Flutter جنب الجامعة.')] },
-    ...[...experience].sort((a, b) => Date.parse(a.when.en.split(' – ')[0].split(' - ')[0]) - Date.parse(b.when.en.split(' – ')[0].split(' - ')[0])).map((e) => ({ year: e.when.en.split(/ [–-] /)[0], label: e.org, role: e.role[lang], org: e.org, when: e.when[lang], note: e.note[lang], points: e.points[lang] })),
+    ...[...experience].sort((a, b) => startKey(a.when.en) - startKey(b.when.en)).map((e) => ({ year: e.when.en.split(/ [–-] /)[0], label: e.org, role: e.role[lang], org: e.org, when: e.when[lang], note: e.note[lang], points: e.points[lang] })),
   ];
   const [i, setI] = useState(chapters.length - 1);
   const c = chapters[i];
