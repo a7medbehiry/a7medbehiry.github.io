@@ -331,7 +331,7 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
                 ) : (
                   <img className="pcard-icon" src={p.icon} alt="" />
                 )}
-                <span className="tag br">{p.status === 'live' ? (p.play ? t('On the stores', 'على الستور') : t('Live', 'شغال')) : t('Live demo', 'ديمو مباشر')}</span>
+                <span className="tag br">{p.status === 'live' ? (p.play || p.onStores ? t('On the stores', 'على الستور') : t('Live', 'شغال')) : t('Live demo', 'ديمو مباشر')}</span>
               </div>
             </article>
           ))}

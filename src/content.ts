@@ -35,6 +35,8 @@ export interface Project {
   play?: string;
   appStore?: string;
   web?: string;
+  /** Published on Google Play / App Store even when no store link is listed. */
+  onStores?: boolean;
   demo?: string;
   status: 'live' | 'demo';
 }
@@ -192,6 +194,7 @@ export const projects: Project[] = [
     stack: ['Flutter', 'Bloc', 'Firebase', 'Remote Config'],
     role: { en: 'Product owner and developer', ar: 'صاحب المنتج والمطور' },
     web: 'https://behiryperfume.com/',
+    onStores: true,
     status: 'live',
   },
 ];
