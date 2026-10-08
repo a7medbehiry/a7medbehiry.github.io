@@ -6,7 +6,6 @@ import taqyIcon from './assets/icons/taqy.png';
 import perfumeIcon from './assets/icons/perfume.png';
 import rent2goIcon from './assets/icons/rent2go.png';
 import carfiIcon from './assets/icons/cargo.png';
-import afdlIcon from './assets/icons/afdl.png';
 
 type L = { en: string; ar: string };
 
@@ -411,5 +410,4 @@ export const alsoShipped: { name: string; icon: string; kind: L }[] = [
   { name: 'Ren2Go Owner', icon: rent2goIcon, kind: { en: 'Fleet owner app with chat', ar: 'تطبيق المالك وفيه شات' } },
   { name: 'Car-Fi User', icon: carfiIcon, kind: { en: 'Car services', ar: 'خدمات العربيات' } },
   { name: 'Car-Fi Owner', icon: carfiIcon, kind: { en: 'Service provider app', ar: 'تطبيق مقدم الخدمة' } },
-  { name: 'Afdl', icon: afdlIcon, kind: { en: 'Classifieds marketplace', ar: 'سوق إعلانات' } },
 ];
