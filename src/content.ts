@@ -407,7 +407,7 @@ export const faq: { q: L; a: L }[] = [
 
 export const alsoShipped: { name: string; icon: string; kind: L }[] = [
   { name: 'Ren2Go Client', icon: rent2goIcon, kind: { en: 'Car rental marketplace', ar: 'سوق إيجار عربيات' } },
-  { name: 'Ren2Go Owner', icon: rent2goIcon, kind: { en: 'Fleet owner app with chat', ar: 'تطبيق المالك وفيه شات' } },
+  { name: 'Ren2Go Owner', icon: rent2goIcon, kind: { en: 'Car owner app for listings and bookings', ar: 'تطبيق المالك للعربيات والحجوزات' } },
   { name: 'Car-Fi User', icon: carfiIcon, kind: { en: 'Car services', ar: 'خدمات العربيات' } },
   { name: 'Car-Fi Owner', icon: carfiIcon, kind: { en: 'Service provider app', ar: 'تطبيق مقدم الخدمة' } },
 ];
