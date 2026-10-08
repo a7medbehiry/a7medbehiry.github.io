@@ -4,7 +4,7 @@ import {
   Layers, Rocket, ShieldCheck, MessageCircle, Globe,
 } from 'lucide-react';
 import type { Lang } from '../shell/types';
-import { alsoShipped, certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
+import { handled, alsoShipped, certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
 import { shopsiiaDemo } from '../demos/shopsiia';
 import { salasaDemo } from '../demos/salasa';
 import { letsDemo } from '../demos/lets';
@@ -217,6 +217,7 @@ function Services({ lang }: { lang: Lang }) {
 function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }) {
   const t = T(lang);
   const [i, setI] = useState(2);
+  const touchX = useRef(0);
   const n = carousel.length;
   const [w, setW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1200));
   useEffect(() => {
@@ -234,7 +235,15 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
       />
       <div className="car" dir="ltr">
         <button className="car-arrow l" onClick={() => setI((i - 1 + n) % n)} aria-label={t('Previous', 'السابق')}><ChevronLeft size={18} /></button>
-        <div className="car-stage" style={{ height: base * 2.25 }}>
+        <div
+          className="car-stage"
+          style={{ height: base * 2.25 }}
+          onTouchStart={(e) => (touchX.current = e.touches[0].clientX)}
+          onTouchEnd={(e) => {
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            if (Math.abs(dx) > 40) setI((cur) => (dx < 0 ? (cur + 1) % n : (cur - 1 + n) % n));
+          }}
+        >
           {carousel.map((c, k) => {
             let d = k - i;
             if (d > n / 2) d -= n;
@@ -260,7 +269,7 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
         <button className="car-arrow r" onClick={() => setI((i + 1) % n)} aria-label={t('Next', 'التالي')}><ChevronRight size={18} /></button>
       </div>
       <div className="car-dots" aria-hidden>{carousel.map((_, k) => <i key={k} className={k === i ? 'on' : ''} />)}</div>
-      <p className="mono-hint">{t('Click a phone to explore', 'دوس على أي موبايل')}</p>
+      <p className="mono-hint">{t('Swipe or tap a phone to explore', 'اسحب أو دوس على أي موبايل')}</p>
 
       <dl className="stats" id="stats">
         <div><dt>3<sup>+</sup></dt><dd>{t('Years in Flutter', 'سنين في Flutter')}</dd></div>
@@ -288,7 +297,7 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
     <section className="work" id="work">
       <SecHead
         title={t('Projects', 'المشاريع')}
-        sub={t('Production apps I built or co-built, with my role in each. Client names are left out.', 'تطبيقات منشورة بنيتها أو شاركت فيها، ودوري في كل واحد. من غير أسماء العملاء.')}
+        sub={t('Production apps I built, most of them as the only developer. Client names are left out.', 'تطبيقات منشورة بنيتها، وأغلبها كنت المطور الوحيد فيها. من غير أسماء العملاء.')}
       />
       <div className="work-grid">
         <ol className="work-index">
@@ -357,7 +366,7 @@ function Journey({ lang }: { lang: Lang }) {
   const t = T(lang);
   const chapters = [
     { year: '2020', label: t('Academic foundation', 'البداية الأكاديمية'), role: t('B.Sc. Computer and Information Technology', 'بكالوريوس حاسبات وتكنولوجيا معلومات'), org: t('Zagazig University', 'جامعة الزقازيق'), when: t('2020 – 2024', '2020 – 2024'), note: t('Arabic native · English excellent · German intermediate', 'العربي اللغة الأم · إنجليزي ممتاز · ألماني متوسط'), points: [t('Studied software engineering and IT, and started building Flutter apps alongside university.', 'درست هندسة البرمجيات وتكنولوجيا المعلومات، وبدأت أبني تطبيقات Flutter جنب الجامعة.')] },
-    ...[...experience].reverse().map((e) => ({ year: e.when.en.match(/\d{4}/)![0], label: e.org, role: e.role[lang], org: e.org, when: e.when[lang], note: e.note[lang], points: e.points[lang] })),
+    ...[...experience].sort((a, b) => Date.parse(a.when.en.split(' – ')[0].split(' - ')[0]) - Date.parse(b.when.en.split(' – ')[0].split(' - ')[0])).map((e) => ({ year: e.when.en.split(/ [–-] /)[0], label: e.org, role: e.role[lang], org: e.org, when: e.when[lang], note: e.note[lang], points: e.points[lang] })),
   ];
   const [i, setI] = useState(chapters.length - 1);
   const c = chapters[i];
@@ -384,19 +393,49 @@ function Journey({ lang }: { lang: Lang }) {
 
 function Process({ lang }: { lang: Lang }) {
   const t = T(lang);
+  const [active, setActive] = useState(0);
+  const s = processSteps[active];
   return (
     <section className="process" id="process">
-      <SecHead title={t('Process', 'طريقة الشغل')} sub={t('How I take a feature from a design file to the stores.', 'إزاي باخد الـ feature من ملف التصميم لحد الستور.')} />
-      <ol className="steps">
-        {processSteps.map((s, k) => (
-          <li key={s.title.en}>
-            <p className="kicker">{t('Phase', 'مرحلة')} {String(k + 1).padStart(2, '0')}</p>
-            <h3>{s.title[lang]}</h3>
-            <p>{s.body[lang]}</p>
-            <ul>{s.tags.map((x) => <li key={x}>{x}</li>)}</ul>
+      <SecHead title={t('Process', 'طريقة الشغل')} sub={t('How I take an app from a design file to the stores, and what you get at each step.', 'إزاي باخد التطبيق من ملف التصميم لحد الستور، وإيه اللي بتستلمه في كل خطوة.')} />
+      <ol className="ptrack" role="tablist" aria-label={t('Phases', 'المراحل')}>
+        {processSteps.map((x, k) => (
+          <li key={x.title.en}>
+            <button role="tab" aria-selected={k === active} className={k === active ? 'on' : k < active ? 'done' : ''} onClick={() => setActive(k)}>
+              <span className="pnum">{String(k + 1).padStart(2, '0')}</span>
+              <span className="pname">{x.title[lang]}</span>
+            </button>
           </li>
         ))}
       </ol>
+      <div className="pcardx" key={active}>
+        <div className="pcardx-main">
+          <p className="kicker">{t('Phase', 'مرحلة')} {String(active + 1).padStart(2, '0')} / {String(processSteps.length).padStart(2, '0')}</p>
+          <h3>{s.title[lang]}</h3>
+          <p>{s.body[lang]}</p>
+          <ul>{s.tags.map((x) => <li key={x}>{x}</li>)}</ul>
+        </div>
+        <div className="pcardx-out">
+          <p className="kicker">{t('You get', 'بتستلم')}</p>
+          <p className="pout"><Check size={18} aria-hidden /> {s.out[lang]}</p>
+          <div className="pnav">
+            <button onClick={() => setActive(Math.max(0, active - 1))} disabled={active === 0} aria-label={t('Previous phase', 'المرحلة اللي فاتت')}><ChevronLeft size={18} className="flip-rtl" /></button>
+            <button onClick={() => setActive(Math.min(processSteps.length - 1, active + 1))} disabled={active === processSteps.length - 1} aria-label={t('Next phase', 'المرحلة الجاية')}><ChevronRight size={18} className="flip-rtl" /></button>
+          </div>
+        </div>
+      </div>
+
+      <div className="handled">
+        <p className="kicker center">{t('Handled in every app', 'متهندل في كل تطبيق')}</p>
+        <ul>
+          {handled.map((h) => (
+            <li key={h.title.en}>
+              <span className="hcheck"><Check size={15} aria-hidden /></span>
+              <span><b>{h.title[lang]}</b><small>{h.body[lang]}</small></span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }
@@ -417,7 +456,7 @@ function Credentials({ lang }: { lang: Lang }) {
         {featuredCerts.map((c) => (
           <a key={c.image} className="cert-fcard" href={c.url} target="_blank" rel="noopener noreferrer">
             <span className={`cert-thumb ${c.image === 'cs50' ? 'wide' : ''}`}>
-              <img src={certImg[c.image]} alt={c.title[lang]} loading="lazy" />
+              <img src={certImg[c.image]} alt={c.title[lang]} />
             </span>
             <span className="cert-fbody">
               <span className="kicker"><i className="dot" aria-hidden /> {c.issuer}</span>

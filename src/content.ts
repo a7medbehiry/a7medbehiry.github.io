@@ -65,8 +65,8 @@ export const projects: Project[] = [
         'كاش في الذاكرة بيفتح الشاشات المتكررة فورًا وبيدمج الطلبات المكررة',
       ],
     },
-    stack: ['Flutter', 'Cubit', 'Clean Architecture', 'go_router', 'Dio', 'FCM', 'Shorebird'],
-    role: { en: 'Freelance · sole mobile developer', ar: 'فريلانس · المطور الوحيد للموبايل' },
+    stack: ['Flutter', 'Cubit', 'Clean Architecture', 'go_router', 'get_it DI', 'Dio interceptors', 'Token refresh', 'LRU cache', 'Secure Storage', 'RTL / i18n', 'Maps & geocoding', 'FCM', 'Firebase Analytics', 'Shorebird OTA'],
+    role: { en: 'Freelance · sole developer', ar: 'فريلانس · المطور الوحيد' },
     demo: 'shopsiia',
     status: 'demo',
   },
@@ -91,8 +91,8 @@ export const projects: Project[] = [
         'لينكات QR بتفتح الشات مباشرة، ومشاركة الموقع المباشر بين المستخدمين',
       ],
     },
-    stack: ['Flutter', 'Bloc', 'WebSockets', 'Agora', 'CallKit', 'FCM'],
-    role: { en: 'Mobile engineer · calls and real-time', ar: 'مهندس موبايل · المكالمات والـ real-time' },
+    stack: ['Flutter', 'Bloc', 'WebSockets (Pusher)', 'Agora RTC', 'CallKit & VoIP push', 'FCM', 'Foreground service', 'Deep links', 'ML Kit QR', 'Live location', 'Stories & camera', 'Video compression'],
+    role: { en: 'Sole developer', ar: 'المطور الوحيد' },
     play: 'https://play.google.com/store/apps/details?id=com.tqnia.magchat',
     appStore: 'https://apps.apple.com/eg/app/lets/id6749202582',
     demo: 'lets',
@@ -119,8 +119,8 @@ export const projects: Project[] = [
         'محفظة إلكترونية وحفظ الكروت عن طريق فواتيرك، وشات داخل التطبيق وإشعارات',
       ],
     },
-    stack: ['Flutter', 'GetX', 'Google Maps', 'Mapbox', 'WebSockets', 'Fawaterak'],
-    role: { en: 'Mobile engineer', ar: 'مهندس موبايل' },
+    stack: ['Flutter', 'GetX', 'Google Maps', 'Mapbox routing', 'Background GPS', 'Foreground service', 'WebSockets bidding', 'Fawaterak wallet', 'Card tokenisation', 'FCM', 'Facebook & TikTok events', 'Shorebird OTA'],
+    role: { en: 'Mobile engineer in the team', ar: 'مهندس موبايل في الفريق' },
     play: 'https://play.google.com/store/apps/details?id=com.tqniait.homeandcars',
     appStore: 'https://apps.apple.com/us/app/home-and-car/id6742241271',
     status: 'live',
@@ -138,18 +138,18 @@ export const projects: Project[] = [
       en: [
         'Every change is saved on the phone first, then synced in the background, so nothing is lost offline',
         'Follow-up reminders as scheduled local notifications',
-        'Role-based access for admins and sales reps, with a Spring Boot and PostgreSQL backend I also built',
+        'Role-based access for admins and sales reps, multi-tenant from day one',
         'Automated iOS and Android releases with GitHub Actions and Shorebird',
       ],
       ar: [
         'أي تعديل بيتحفظ على الموبايل الأول وبعدين بيتعمله sync في الخلفية، فمفيش داتا بتضيع من غير نت',
         'تذكير بالمتابعات كإشعارات محلية في ميعادها',
-        'صلاحيات للأدمن ومندوبي المبيعات، مع باك إند Spring Boot و PostgreSQL عملته برضه',
+        'صلاحيات للأدمن ومندوبي المبيعات، ومتعدد المستأجرين من أول يوم',
         'رفع نسخ iOS و Android أوتوماتيك بـ GitHub Actions و Shorebird',
       ],
     },
-    stack: ['Flutter', 'Cubit', 'SQLite', 'Spring Boot', 'PostgreSQL', 'GitHub Actions'],
-    role: { en: 'Own product · built end to end', ar: 'منتجي الخاص · من الفكرة للإطلاق' },
+    stack: ['Flutter', 'Cubit', 'Clean Architecture', 'SQLite', 'Offline-first sync', 'Conflict-safe deletes', 'Multi-tenant RBAC', 'Scheduled notifications', 'Dio', 'dartz Either', 'GitHub Actions CI/CD', 'Shorebird OTA'],
+    role: { en: 'Own product · sole developer', ar: 'منتجي الخاص · المطور الوحيد' },
     demo: 'salasa',
     status: 'demo',
   },
@@ -164,15 +164,19 @@ export const projects: Project[] = [
     },
     points: {
       en: [
-        'Three roles in one app: admin, employee and office staff, each with its own flow',
-        'Built solo on Firebase: Authentication, Cloud Firestore real-time updates, Storage and Cloud Messaging',
+        'Three roles in one app: admin, employee and office staff, each with its own screens and permissions',
+        'Orders update live on every device through Cloud Firestore streams, with no refresh needed',
+        'Staff get a push the moment an order arrives, sent through the FCM HTTP v1 API',
+        'Built solo end to end on Firebase: Auth, Firestore, Storage and Cloud Messaging'
       ],
       ar: [
-        'تلات أدوار في تطبيق واحد: أدمن وموظف وأوفيس بوي، ولكل واحد شاشاته',
-        'عملته لوحدي على Firebase: تسجيل دخول، وتحديثات لحظية بـ Firestore، وتخزين، وإشعارات',
+        'تلات أدوار في تطبيق واحد: أدمن وموظف وأوفيس بوي، ولكل واحد شاشاته وصلاحياته',
+        'الطلبات بتتحدث لحظيًا على كل الأجهزة عن طريق Firestore streams من غير refresh',
+        'الأوفيس بوي بيوصله إشعار أول ما الطلب يتعمل، عن طريق FCM HTTP v1',
+        'عملته لوحدي من الأول للآخر على Firebase: Auth و Firestore و Storage و Messaging'
       ],
     },
-    stack: ['Flutter', 'Bloc', 'Firebase Auth', 'Firestore', 'FCM'],
+    stack: ['Flutter', 'Bloc', 'Clean Architecture', 'Firebase Auth', 'Cloud Firestore streams', 'Firebase Storage', 'FCM HTTP v1', 'Role-based flows', 'freezed', 'go_router', 'get_it DI'],
     role: { en: 'Sole developer', ar: 'المطور الوحيد' },
     play: 'https://play.google.com/store/apps/details?id=com.tqniait.taqy',
     appStore: 'https://apps.apple.com/eg/app/taqy/id6755384464',
@@ -188,11 +192,11 @@ export const projects: Project[] = [
       ar: 'قدت تحويل بيزنس عطور حقيقي للأونلاين: المنتج وتجربة المستخدم والتطبيق وخطة الإصدارات.',
     },
     points: {
-      en: ['Catalog, categories, cart and checkout', 'Google sign-in, push notifications and Remote Config for feature flags'],
-      ar: ['كتالوج وأقسام وسلة ودفع', 'تسجيل دخول بجوجل وإشعارات و Remote Config للتحكم في الميزات'],
+      en: ['Catalog, categories, cart and checkout for a real fragrance business', 'Voice search, Google sign-in and push notifications for offers', 'Remote Config to switch features and campaigns without a release', 'Crashlytics monitoring and regular releases based on customer feedback'],
+      ar: ['كتالوج وأقسام وسلة ودفع لبيزنس عطور حقيقي', 'بحث بالصوت، وتسجيل دخول بجوجل، وإشعارات للعروض', 'Remote Config لتشغيل الميزات والحملات من غير إصدار جديد', 'متابعة الأعطال بـ Crashlytics وإصدارات منتظمة حسب آراء العملاء'],
     },
-    stack: ['Flutter', 'Bloc', 'Firebase', 'Remote Config'],
-    role: { en: 'Product owner and developer', ar: 'صاحب المنتج والمطور' },
+    stack: ['Flutter', 'Bloc', 'Firebase Auth', 'Google Sign-In', 'Remote Config', 'Crashlytics', 'FCM', 'Voice search', 'Deep links & sharing', 'In-app onboarding', 'Dio'],
+    role: { en: 'Product owner · sole developer', ar: 'صاحب المنتج · المطور الوحيد' },
     web: 'https://behiryperfume.com/',
     onStores: true,
     status: 'live',
@@ -241,12 +245,12 @@ export const experience = [
 ];
 
 export const skills: { group: L; items: string[] }[] = [
-  { group: { en: 'Mobile', ar: 'الموبايل' }, items: ['Flutter', 'Dart', 'Android', 'iOS', 'Platform channels'] },
-  { group: { en: 'State & architecture', ar: 'الحالة والمعمارية' }, items: ['Bloc / Cubit', 'Provider', 'Riverpod', 'GetX', 'Clean Architecture', 'MVVM', 'SOLID'] },
-  { group: { en: 'Data & real-time', ar: 'البيانات واللحظي' }, items: ['REST', 'WebSockets', 'Firebase', 'SQLite', 'Hive', 'Secure Storage'] },
-  { group: { en: 'Payments & maps', ar: 'الدفع والخرائط' }, items: ['Stripe', 'PayPal', 'Paymob', 'MyFatoorah', 'Fawaterak', 'Google Maps', 'Mapbox'] },
-  { group: { en: 'Release', ar: 'الإصدار' }, items: ['GitHub Actions', 'Shorebird', 'TestFlight', 'Google Play', 'Firebase App Distribution'] },
-  { group: { en: 'Backend', ar: 'الباك إند' }, items: ['Spring Boot', 'Node.js', 'PostgreSQL', 'MySQL'] },
+  { group: { en: 'Mobile & platform', ar: 'الموبايل والمنصات' }, items: ['Flutter', 'Dart', 'Android', 'iOS', 'Platform channels', 'Foreground services', 'Background location', 'CallKit & VoIP', 'Deep links / App Links'] },
+  { group: { en: 'Architecture & state', ar: 'المعمارية والحالة' }, items: ['Clean Architecture', 'Feature-first modules', 'Bloc / Cubit', 'Riverpod', 'Provider', 'GetX', 'get_it DI', 'go_router', 'MVVM', 'SOLID'] },
+  { group: { en: 'Networking & real-time', ar: 'الشبكة واللحظي' }, items: ['REST', 'Dio interceptors', 'Token refresh', 'WebSockets / Pusher', 'Agora RTC', 'FCM HTTP v1', 'Request de-duplication', 'Caching'] },
+  { group: { en: 'Data & offline', ar: 'البيانات والأوفلاين' }, items: ['SQLite', 'Hive', 'Offline-first sync', 'Secure Storage', 'SharedPreferences', 'Cloud Firestore', 'Remote Config'] },
+  { group: { en: 'Payments & maps', ar: 'الدفع والخرايط' }, items: ['Stripe', 'PayPal', 'Paymob', 'MyFatoorah', 'Fawaterak', 'Card tokenisation', 'Google Maps', 'Mapbox routing', 'Geocoding'] },
+  { group: { en: 'Quality & release', ar: 'الجودة والإصدار' }, items: ['Unit & widget tests', 'Crashlytics', 'Firebase Analytics', 'DevTools profiling', 'GitHub Actions', 'Shorebird OTA', 'TestFlight', 'Google Play Console', 'Firebase App Distribution'] },
 ];
 
 export const writing = [
@@ -270,17 +274,51 @@ export const writing = [
 export const services: { title: L; body: L }[] = [
   { title: { en: 'Mobile App Development', ar: 'تطوير تطبيقات الموبايل' }, body: { en: 'Production Flutter apps for Android and iOS from one codebase, with native features where they matter.', ar: 'تطبيقات Flutter منشورة على Android و iOS من كود واحد، مع ميزات Native وقت ما تحتاجها.' } },
   { title: { en: 'Real-time & Calls', ar: 'اللحظي والمكالمات' }, body: { en: 'Chat over WebSockets, voice and video calls with Agora, and calls that ring on the lock screen.', ar: 'شات بالـ WebSockets، ومكالمات صوت وفيديو بـ Agora، ومكالمات بترن على شاشة القفل.' } },
-  { title: { en: 'Backend & API Integration', ar: 'ربط الـ APIs والباك إند' }, body: { en: 'REST, Firebase, payment gateways and maps, plus Spring Boot and PostgreSQL when the project needs its own backend.', ar: 'REST و Firebase وبوابات الدفع والخرايط، و Spring Boot و PostgreSQL لو المشروع محتاج باك إند خاص.' } },
+  { title: { en: 'Backend & API Integration', ar: 'ربط الـ APIs والباك إند' }, body: { en: 'REST, WebSockets, Firebase, payment gateways and maps, wired in with clean error handling and retries.', ar: 'REST و WebSockets و Firebase وبوابات الدفع والخرايط، مع تعامل نضيف مع الأخطاء وإعادة المحاولة.' } },
   { title: { en: 'App Architecture', ar: 'معمارية التطبيق' }, body: { en: 'Clean Architecture with Bloc/Cubit, dependency injection, offline-first storage and code a team can keep working on.', ar: 'Clean Architecture مع Bloc/Cubit، و Dependency Injection، وتخزين بيشتغل من غير نت، وكود الفريق يقدر يكمّل عليه.' } },
   { title: { en: 'Release & Updates', ar: 'الرفع والتحديثات' }, body: { en: 'App Store and Google Play releases, CI/CD with GitHub Actions, and over-the-air fixes with Shorebird.', ar: 'رفع على App Store و Google Play، و CI/CD بـ GitHub Actions، وتحديثات فورية بـ Shorebird.' } },
 ];
 
-export const processSteps: { title: L; body: L; tags: string[] }[] = [
-  { title: { en: 'Understand the product', ar: 'فهم المنتج' }, body: { en: 'Read the requirements and designs, ask the awkward questions early, and agree what "done" means.', ar: 'أقرا المتطلبات والتصميمات، وأسأل الأسئلة الصعبة بدري، ونتفق يعني إيه "خلصت".' }, tags: ['Requirements', 'Figma', 'API contract'] },
-  { title: { en: 'Plan the architecture', ar: 'تخطيط المعمارية' }, body: { en: 'Split the app into features, pick state management and storage, and set up the project so it scales.', ar: 'أقسّم التطبيق features، وأختار إدارة الحالة والتخزين، وأجهّز المشروع بحيث يكبر بسهولة.' }, tags: ['Clean Architecture', 'Bloc', 'DI'] },
-  { title: { en: 'Build feature by feature', ar: 'بناء feature ورا التانية' }, body: { en: 'Pixel-accurate screens, API integration and edge cases like slow networks, empty states and errors.', ar: 'شاشات مطابقة للتصميم، وربط الـ APIs، والحالات الصعبة زي النت البطيء والشاشات الفاضية والأخطاء.' }, tags: ['UI', 'REST', 'WebSockets'] },
-  { title: { en: 'Test and polish', ar: 'اختبار وتحسين' }, body: { en: 'Test on real devices, fix crashes from Crashlytics, and tune performance before release.', ar: 'أجرّب على أجهزة حقيقية، وأصلّح الـ crashes من Crashlytics، وأحسّن الأداء قبل الرفع.' }, tags: ['Testing', 'Crashlytics', 'Performance'] },
-  { title: { en: 'Release and support', ar: 'الرفع والمتابعة' }, body: { en: 'Ship to both stores, automate the pipeline, and push quick fixes over the air after launch.', ar: 'أرفع على الستورين، وأعمل أتمتة للرفع، وأبعت تصليحات سريعة بعد الإطلاق.' }, tags: ['TestFlight', 'Google Play', 'Shorebird'] },
+export const processSteps: { title: L; body: L; out: L; tags: string[] }[] = [
+  {
+    title: { en: 'Understand the product', ar: 'فهم المنتج' },
+    body: { en: 'I read the requirements and designs, walk through every user flow, and ask the awkward questions before writing code.', ar: 'بقرا المتطلبات والتصميمات، وبمشي على كل رحلة للمستخدم، وبسأل الأسئلة الصعبة قبل ما أكتب كود.' },
+    out: { en: 'Screen list, API contract and a clear definition of done', ar: 'لستة الشاشات، واتفاق على الـ API، وتعريف واضح لـ "خلصت"' },
+    tags: ['Requirements', 'Figma', 'API contract'],
+  },
+  {
+    title: { en: 'Plan the architecture', ar: 'تخطيط المعمارية' },
+    body: { en: 'Feature-first Clean Architecture, the right state management and storage, and the project set up for flavours, localisation and CI.', ar: 'Clean Architecture مقسمة features، وإدارة حالة وتخزين مناسبين، والمشروع متجهز للـ flavours والترجمة والـ CI.' },
+    out: { en: 'A project skeleton the whole team can build on', ar: 'هيكل مشروع الفريق كله يقدر يبني عليه' },
+    tags: ['Clean Architecture', 'Bloc', 'get_it', 'go_router'],
+  },
+  {
+    title: { en: 'Build feature by feature', ar: 'بناء feature ورا التانية' },
+    body: { en: 'Pixel-accurate screens connected to real APIs, with loading, empty, error and offline states designed in rather than added later.', ar: 'شاشات مطابقة للتصميم ومربوطة بـ APIs حقيقية، وحالات التحميل والفاضي والخطأ والأوفلاين متصممة من الأول مش متضافة بعدين.' },
+    out: { en: 'A working build every week on TestFlight and Firebase App Distribution', ar: 'نسخة شغالة كل أسبوع على TestFlight و Firebase App Distribution' },
+    tags: ['UI', 'REST', 'WebSockets', 'RTL'],
+  },
+  {
+    title: { en: 'Test and harden', ar: 'اختبار وتقوية' },
+    body: { en: 'Unit and widget tests for the logic that matters, testing on real low-end devices and slow networks, and fixing what Crashlytics reports.', ar: 'Unit و Widget tests للمنطق المهم، وتجربة على أجهزة ضعيفة ونت بطيء، وتصليح اللي Crashlytics بيطلّعه.' },
+    out: { en: 'Crash-free sessions and smooth scrolling before release', ar: 'جلسات من غير crashes وسكرول ناعم قبل الإطلاق' },
+    tags: ['Testing', 'Crashlytics', 'DevTools'],
+  },
+  {
+    title: { en: 'Release and keep improving', ar: 'الإطلاق والتطوير المستمر' },
+    body: { en: 'Store listings, review fixes and automated releases, then fast patches over the air and new features driven by real usage.', ar: 'صفحات الستور، وتصليح ملاحظات المراجعة، ورفع أوتوماتيك، وبعدها تصليحات فورية وميزات جديدة على حسب الاستخدام الحقيقي.' },
+    out: { en: 'Live on Google Play and the App Store, with updates in hours, not days', ar: 'منشور على Google Play و App Store، والتحديثات بتاخد ساعات مش أيام' },
+    tags: ['GitHub Actions', 'Shorebird', 'Analytics'],
+  },
+];
+
+export const handled: { title: L; body: L }[] = [
+  { title: { en: 'Offline and slow networks', ar: 'من غير نت أو نت بطيء' }, body: { en: 'Cached data, retries, and local-first saving where it matters.', ar: 'داتا متخزنة، وإعادة محاولة، وحفظ محلي في الأماكن المهمة.' } },
+  { title: { en: 'Errors users understand', ar: 'أخطاء المستخدم يفهمها' }, body: { en: 'Typed failures mapped to clear messages, never a raw exception.', ar: 'كل خطأ ليه رسالة واضحة، عمر ما هيظهر exception خام.' } },
+  { title: { en: 'Session and security', ar: 'الجلسة والأمان' }, body: { en: 'Token refresh, secure storage and safe logout across devices.', ar: 'تجديد التوكن، وتخزين آمن، وتسجيل خروج آمن.' } },
+  { title: { en: 'Arabic and English', ar: 'عربي وإنجليزي' }, body: { en: 'Full RTL layouts, localised numbers, dates and currency.', ar: 'تصميم كامل من اليمين للشمال، وأرقام وتواريخ وعملة مترجمة.' } },
+  { title: { en: 'Notifications and deep links', ar: 'الإشعارات والـ Deep links' }, body: { en: 'Every push opens the right screen, even from a closed app.', ar: 'كل إشعار بيفتح الشاشة الصح، حتى والتطبيق مقفول.' } },
+  { title: { en: 'Performance', ar: 'الأداء' }, body: { en: 'Smooth lists, light rebuilds and images sized for the device.', ar: 'قوايم ناعمة، و rebuilds قليلة، وصور مقاسها مناسب للجهاز.' } },
 ];
 
 export interface Cert {
