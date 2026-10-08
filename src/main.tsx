@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useState } from 'react';
+import { Component, StrictMode, useEffect, useState, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { DemoDef, Lang } from './shell/types';
 import { DemoShell } from './shell/DemoShell';
@@ -77,8 +77,45 @@ function App() {
   return <Site lang={lang} setLang={setLang} openDemo={openDemo} />;
 }
 
+/** If anything throws, show a way back instead of an empty page. */
+class Recover extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error(error);
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    const ar = document.documentElement.lang === 'ar';
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, textAlign: 'center', fontFamily: 'var(--f-body)' }}>
+        <div>
+          <p style={{ fontSize: 18, margin: '0 0 16px' }}>{ar ? 'حصلت مشكلة في عرض الصفحة.' : 'Something went wrong while showing this page.'}</p>
+          <button
+            className="pill-dark"
+            onClick={() => {
+              try {
+                window.history.replaceState(null, '', window.location.pathname);
+              } catch {
+                /* ignore */
+              }
+              window.location.reload();
+            }}
+          >
+            {ar ? 'ارجع للبورتفوليو' : 'Back to the portfolio'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <Recover>
+      <App />
+    </Recover>
   </StrictMode>,
 );

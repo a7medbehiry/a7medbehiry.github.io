@@ -68,7 +68,9 @@ const REPLIES_AR = ['تمام كده', 'ماشي!', 'ممكن تبعتها تا�
 export function LetsApp({ api }: { api: AppApi }) {
   const { nav, lang } = api;
   const [chats, setChats] = useState<Chat[]>(() => seed(lang === 'ar'));
-  useEffect(() => setChats(seed(lang === 'ar')), [lang]);
+  useEffect(() => {
+    setChats(seed(lang === 'ar'));
+  }, [lang]);
   const r = nav.route;
 
   const send = (id: string, text: string, kind?: Msg['kind']) => {
@@ -182,8 +184,13 @@ function Conversation({ api, chat, send, receive, read }: { api: AppApi; chat: C
   const [typing, setTyping] = useState(false);
   const end = useRef<HTMLDivElement>(null);
   const Chev = lang === 'ar' ? ChevronRight : ChevronLeft;
-  useEffect(() => read(chat.id), [chat.id]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => end.current?.scrollIntoView({ block: 'end' }), [chat.msgs.length, typing]);
+  useEffect(() => {
+    read(chat.id);
+  }, [chat.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Newer Chrome returns a Promise from scrollIntoView; never hand it back to React as a cleanup.
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: 'end' });
+  }, [chat.msgs.length, typing]);
 
   const reply = () => {
     window.setTimeout(() => setTyping(true), 700);
