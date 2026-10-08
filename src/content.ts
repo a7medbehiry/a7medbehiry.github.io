@@ -205,6 +205,24 @@ export const projects: Project[] = [
 
 export const experience = [
   {
+    role: { en: 'Freelance Flutter Developer', ar: 'مطور Flutter فريلانس' },
+    org: 'Freelance',
+    when: { en: 'Jul 2026 – present', ar: 'يوليو 2026 – الآن' },
+    note: { en: 'Remote · sole developer on client apps', ar: 'عن بُعد · المطور الوحيد في تطبيقات العملاء' },
+    points: {
+      en: [
+        'Building Shopsiia, a multi-vendor marketplace for Android and iOS, from the first commit to release',
+        'Taking client apps from design files to the stores: architecture, API integration, payments and notifications',
+        'Owning the full delivery: estimates, weekly builds on TestFlight, store submissions and support after launch',
+      ],
+      ar: [
+        'ببني Shopsiia، سوق إلكتروني متعدد البائعين على Android و iOS، من أول commit لحد الإطلاق',
+        'باخد تطبيقات العملاء من ملفات التصميم لحد الستور: المعمارية وربط الـ APIs والدفع والإشعارات',
+        'مسؤول عن التسليم كله: التقدير، ونسخ أسبوعية على TestFlight، والرفع على الستور، والدعم بعد الإطلاق',
+      ],
+    },
+  },
+  {
     role: { en: 'Mobile Software Engineer', ar: 'مهندس برمجيات موبايل' },
     org: 'Tqnia IT',
     when: { en: 'Oct 2024 – Sep 2026', ar: 'أكتوبر 2024 – سبتمبر 2026' },
