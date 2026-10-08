@@ -188,7 +188,7 @@ function Services({ lang }: { lang: Lang }) {
   }, []);
   return (
     <section className="services" id="services">
-      <p className="kicker center">{t('Tech stack & ecosystem', 'التقنيات والأدوات')}</p>
+      <p className="kicker center">{t('What I build', 'بعمل إيه')}</p>
       <SecHead
         title={t('Services & Architecture', 'الخدمات والمعمارية')}
         sub={t('End-to-end mobile engineering: architecture, accurate UI, integrations and store release.', 'هندسة موبايل كاملة: المعمارية، وواجهات مطابقة للتصميم، والربط مع الأنظمة، والرفع على الستور.')}
@@ -230,8 +230,8 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
   return (
     <section className="latest" id="projects">
       <SecHead
-        title={t('Latest Projects', 'أحدث المشاريع')}
-        sub={t('Real screens from my Flutter apps. Tap the phone in the middle to use the app live.', 'شاشات حقيقية من تطبيقاتي. دوس على الموبايل اللي في النص وجرّب التطبيق بنفسك.')}
+        title={t('Try It Live', 'جرّبها بنفسك')}
+        sub={t('Interactive versions of three of my Flutter apps, running in your browser with sample data. Tap the phone in the middle to start.', 'نسخ تفاعلية من تلات تطبيقات Flutter عملتهم، شغالة في المتصفح ببيانات تجريبية. دوس على الموبايل اللي في النص وابدأ.')}
       />
       <div className="car" dir="ltr">
         <button className="car-arrow l" onClick={() => setI((i - 1 + n) % n)} aria-label={t('Previous', 'السابق')}><ChevronLeft size={18} /></button>
@@ -296,8 +296,8 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
   return (
     <section className="work" id="work">
       <SecHead
-        title={t('Projects', 'المشاريع')}
-        sub={t('Production apps I built, most of them as the only developer. Client names are left out.', 'تطبيقات منشورة بنيتها، وأغلبها كنت المطور الوحيد فيها. من غير أسماء العملاء.')}
+        title={t('Selected Work', 'أعمال مختارة')}
+        sub={t('A selection of the production apps I have built, most of them as the only developer. Client names are left out.', 'مختارات من التطبيقات المنشورة اللي بنيتها، وأغلبها كنت المطور الوحيد فيها. من غير أسماء العملاء.')}
       />
       <div className="work-grid">
         <ol className="work-index">
@@ -347,7 +347,7 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
         </div>
       </div>
       <div className="also">
-        <p className="kicker">{t('Also shipped to the stores', 'منشور برضه على الستور')}</p>
+        <p className="kicker">{t('More apps on the stores', 'تطبيقات تانية على الستور')}</p>
         <ul>
           {alsoShipped.map((a) => (
             <li key={a.name}>
@@ -372,7 +372,7 @@ function Journey({ lang }: { lang: Lang }) {
   const c = chapters[i];
   return (
     <section className="journey" id="experience">
-      <SecHead title={t('Experience', 'الخبرة')} sub={t('From university to production apps used by real customers.', 'من الجامعة لتطبيقات منشورة بيستخدمها عملاء حقيقيين.')} />
+      <SecHead title={t('My Journey', 'رحلتي')} sub={t('From university to freelance work and production apps used by real customers.', 'من الجامعة للفريلانس وتطبيقات منشورة بيستخدمها عملاء حقيقيين.')} />
       <div className="years" role="tablist">
         {chapters.map((ch, k) => (
           <button key={ch.label + k} role="tab" aria-selected={k === i} className={k === i ? 'on' : ''} onClick={() => setI(k)}>
@@ -397,7 +397,7 @@ function Process({ lang }: { lang: Lang }) {
   const s = processSteps[active];
   return (
     <section className="process" id="process">
-      <SecHead title={t('Process', 'طريقة الشغل')} sub={t('How I take an app from a design file to the stores, and what you get at each step.', 'إزاي باخد التطبيق من ملف التصميم لحد الستور، وإيه اللي بتستلمه في كل خطوة.')} />
+      <SecHead title={t('How I Work', 'طريقة شغلي')} sub={t('How I take an app from a design file to the stores, and what you get at each step.', 'إزاي باخد التطبيق من ملف التصميم لحد الستور، وإيه اللي بتستلمه في كل خطوة.')} />
       <ol className="ptrack" role="tablist" aria-label={t('Phases', 'المراحل')}>
         {processSteps.map((x, k) => (
           <li key={x.title.en}>
@@ -449,7 +449,7 @@ function Credentials({ lang }: { lang: Lang }) {
     <section className="creds" id="credentials">
       <SecHead
         title={t('Credentials', 'الشهادات')}
-        sub={t(`Recognition at work and ${total} courses and certificates behind the hands-on experience.`, `تكريمات في الشغل و${total} كورس وشهادة ورا الخبرة العملية.`)}
+        sub={t(`Recognition at work, plus ${total} courses and certificates that back up the hands-on experience.`, `تكريمات في الشغل، و${total} كورس وشهادة بيدعموا الخبرة العملية.`)}
       />
 
       <div className="cert-feature">
