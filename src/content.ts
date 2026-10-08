@@ -206,7 +206,7 @@ export const experience = [
   {
     role: { en: 'Freelance Flutter Developer', ar: 'مطور Flutter فريلانس' },
     org: 'Freelance',
-    when: { en: 'Jul 2026 – present', ar: 'يوليو 2026 – الآن' },
+    when: { en: '2023 – present', ar: '2023 – الآن' },
     note: { en: 'Remote · sole developer on client apps', ar: 'عن بُعد · المطور الوحيد في تطبيقات العملاء' },
     points: {
       en: [
