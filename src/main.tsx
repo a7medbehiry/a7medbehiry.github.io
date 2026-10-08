@@ -3,12 +3,12 @@ import { createRoot } from 'react-dom/client';
 import type { DemoDef, Lang } from './shell/types';
 import { DemoShell } from './shell/DemoShell';
 import { Site } from './site/Site';
-import { shopsiiaDemo } from './demos/shopsiia';
+// import { shopsiiaDemo } from './demos/shopsiia'; // HIDDEN: Shopsiia
 import { salasaDemo } from './demos/salasa';
 import { letsDemo } from './demos/lets';
 import './tokens.css';
 
-const demos: Record<string, DemoDef> = { shopsiia: shopsiiaDemo, salasa: salasaDemo, lets: letsDemo };
+const demos: Record<string, DemoDef> = { /* shopsiia: shopsiiaDemo, */ salasa: salasaDemo, lets: letsDemo }; // HIDDEN: Shopsiia
 
 const readHash = () => window.location.hash.replace('#', '');
 const demoFromHash = () => {

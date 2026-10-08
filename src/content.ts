@@ -1,4 +1,4 @@
-import shopsiiaIcon from './assets/icons/shopsiia.png';
+// import shopsiiaIcon from './assets/icons/shopsiia.png'; // HIDDEN: Shopsiia
 import salasaIcon from './assets/icons/salasa.png';
 import letsIcon from './assets/icons/magchat.png';
 import homecarIcon from './assets/icons/homecar.png';
@@ -41,6 +41,9 @@ export interface Project {
 }
 
 export const projects: Project[] = [
+  // HIDDEN for now: Shopsiia. To show it again, remove the /* */ around this block,
+  // and uncomment the Shopsiia lines in src/main.tsx and src/site/Site.tsx.
+  /*
   {
     id: 'shopsiia',
     name: 'Shopsiia',
@@ -69,6 +72,7 @@ export const projects: Project[] = [
     demo: 'shopsiia',
     status: 'demo',
   },
+  */
   {
     id: 'lets',
     name: "Let's",
@@ -210,12 +214,12 @@ export const experience = [
     note: { en: 'Remote · sole developer on client apps', ar: 'عن بُعد · المطور الوحيد في تطبيقات العملاء' },
     points: {
       en: [
-        'Building Shopsiia, a multi-vendor marketplace for Android and iOS, from the first commit to release',
+        'Building a multi-vendor marketplace for Android and iOS, from the first commit to release',
         'Taking client apps from design files to the stores: architecture, API integration, payments and notifications',
         'Owning the full delivery: estimates, weekly builds on TestFlight, store submissions and support after launch',
       ],
       ar: [
-        'ببني Shopsiia، سوق إلكتروني متعدد البائعين على Android و iOS، من أول commit لحد الإطلاق',
+        'ببني سوق إلكتروني متعدد البائعين على Android و iOS، من أول commit لحد الإطلاق',
         'باخد تطبيقات العملاء من ملفات التصميم لحد الستور: المعمارية وربط الـ APIs والدفع والإشعارات',
         'مسؤول عن التسليم كله: التقدير، ونسخ أسبوعية على TestFlight، والرفع على الستور، والدعم بعد الإطلاق',
       ],

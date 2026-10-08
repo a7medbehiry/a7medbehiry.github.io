@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import type { Lang } from '../shell/types';
 import { handled, alsoShipped, certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
-import { shopsiiaDemo } from '../demos/shopsiia';
+// import { shopsiiaDemo } from '../demos/shopsiia'; // HIDDEN: Shopsiia
 import { salasaDemo } from '../demos/salasa';
 import { letsDemo } from '../demos/lets';
 import { MiniPhone } from './MiniPhone';
@@ -22,10 +22,12 @@ import './site.css';
 const T = (lang: Lang) => (en: string, ar: string) => (lang === 'ar' ? ar : en);
 
 const carousel = [
-  { demo: shopsiiaDemo, route: { name: 'home' } },
+  // { demo: shopsiiaDemo, route: { name: 'home' } }, // HIDDEN: Shopsiia
+  { demo: salasaDemo, route: { name: 'clients' } },
   { demo: salasaDemo, route: { name: 'dashboard' } },
   { demo: letsDemo, route: { name: 'list' } },
-  { demo: shopsiiaDemo, route: { name: 'product', params: { id: 'p1' } } },
+  // { demo: shopsiiaDemo, route: { name: 'product', params: { id: 'p1' } } }, // HIDDEN: Shopsiia
+  { demo: letsDemo, route: { name: 'qr' } },
   { demo: letsDemo, route: { name: 'chat', params: { id: 'nada' } } },
   { demo: salasaDemo, route: { name: 'followups' } },
 ];
@@ -38,7 +40,7 @@ const panel: Record<string, string> = {
   taqy: 'linear-gradient(150deg,#ffe1dc,#f26b5b)',
   perfume: 'linear-gradient(150deg,#ffd9bf,#f2732a)',
 };
-const demoFor: Record<string, typeof shopsiiaDemo> = { shopsiia: shopsiiaDemo, salasa: salasaDemo, lets: letsDemo };
+const demoFor: Record<string, typeof letsDemo> = { /* shopsiia: shopsiiaDemo, */ salasa: salasaDemo, lets: letsDemo }; // HIDDEN: Shopsiia
 const demoRoute: Record<string, { name: string; params?: Record<string, string> }> = {
   shopsiia: { name: 'home' },
   salasa: { name: 'dashboard' },
@@ -123,8 +125,8 @@ function Hero({ lang }: { lang: Lang }) {
         <p className="hero-name">{profile.name[lang]} · {profile.location[lang]}</p>
         <p className="hero-lede">
           {t(
-            'I build Android and iOS apps that ship to the stores and hold up in production: e-commerce, real-time chat and calls, on-demand services and business tools. Three of them run right here, so you can try them before we talk.',
-            'ببني تطبيقات Android و iOS بتتنشر على الستور وبتشتغل كويس في الإنتاج: تجارة إلكترونية، وشات ومكالمات لحظية، وخدمات عند الطلب، وأدوات بيزنس. وتلاتة منهم شغالين هنا، تقدر تجربهم قبل ما نتكلم.',
+            'I build Android and iOS apps that ship to the stores and hold up in production: e-commerce, real-time chat and calls, on-demand services and business tools. Two of them run right here, so you can try them before we talk.',
+            'ببني تطبيقات Android و iOS بتتنشر على الستور وبتشتغل كويس في الإنتاج: تجارة إلكترونية، وشات ومكالمات لحظية، وخدمات عند الطلب، وأدوات بيزنس. واتنين منهم شغالين هنا، تقدر تجربهم قبل ما نتكلم.',
           )}
         </p>
         <div className="hero-actions">
@@ -231,7 +233,7 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
     <section className="latest" id="projects">
       <SecHead
         title={t('Try It Live', 'جرّبها بنفسك')}
-        sub={t('Interactive versions of three of my Flutter apps, running in your browser with sample data. Tap the phone in the middle to start.', 'نسخ تفاعلية من تلات تطبيقات Flutter عملتهم، شغالة في المتصفح ببيانات تجريبية. دوس على الموبايل اللي في النص وابدأ.')}
+        sub={t('Interactive versions of two of my Flutter apps, running in your browser with sample data. Tap the phone in the middle to start.', 'نسخ تفاعلية من تطبيقين Flutter عملتهم، شغالة في المتصفح ببيانات تجريبية. دوس على الموبايل اللي في النص وابدأ.')}
       />
       <div className="car" dir="ltr">
         <button className="car-arrow l" onClick={() => setI((i - 1 + n) % n)} aria-label={t('Previous', 'السابق')}><ChevronLeft size={18} /></button>
@@ -275,7 +277,7 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
         <div><dt>3<sup>+</sup></dt><dd>{t('Years in Flutter', 'سنين في Flutter')}</dd></div>
         <div><dt>15<sup>+</sup></dt><dd>{t('Apps live on the stores', 'تطبيق منشور على الستور')}</dd></div>
         <div><dt>25<sup>+</sup></dt><dd>{t('Flutter apps worked on', 'تطبيق Flutter اشتغلت عليه')}</dd></div>
-        <div><dt>3</dt><dd>{t('Live demos', 'ديموهات مباشرة')}</dd></div>
+        <div><dt>{Object.keys(demoFor).length}</dt><dd>{t('Live demos', 'ديموهات مباشرة')}</dd></div>
       </dl>
     </section>
   );
