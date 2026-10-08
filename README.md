@@ -21,7 +21,8 @@ The demos are web recreations of the Flutter apps and use sample data only.
 
 ```bash
 npm install
-npm run dev
+npm run dev      # opens /dev.html
+npm run build    # writes the self-contained index.html to dist/ and the repo root
 ```
 
-Pushing to `main` builds the site and publishes it to GitHub Pages through `.github/workflows/deploy.yml`.
+The root `index.html` is the built site, so GitHub Pages works whether it deploys from the branch or from Actions. Pushing to `main` builds the site and publishes it to GitHub Pages through `.github/workflows/deploy.yml`.
