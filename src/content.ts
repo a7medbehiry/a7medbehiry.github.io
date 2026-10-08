@@ -2,7 +2,6 @@ import shopsiiaIcon from './assets/icons/shopsiia.png';
 import salasaIcon from './assets/icons/salasa.png';
 import letsIcon from './assets/icons/magchat.png';
 import homecarIcon from './assets/icons/homecar.png';
-import lusterIcon from './assets/icons/luster.png';
 import taqyIcon from './assets/icons/taqy.png';
 import perfumeIcon from './assets/icons/perfume.png';
 
@@ -175,25 +174,6 @@ export const projects: Project[] = [
     status: 'live',
   },
   {
-    id: 'luster',
-    name: 'Luster',
-    icon: lusterIcon,
-    kind: { en: 'Business management', ar: 'إدارة البيزنس' },
-    summary: {
-      en: 'Runs a small business from the phone: orders, customers, team and products, in Arabic and English.',
-      ar: 'تدير بيه بيزنس صغير من الموبايل: الأوردرات والعملاء والفريق والمنتجات، بالعربي والإنجليزي.',
-    },
-    points: {
-      en: ['Orders, customers, team and product management', 'QR scanning and full Arabic/English support'],
-      ar: ['إدارة الأوردرات والعملاء والفريق والمنتجات', 'قراءة QR ودعم كامل للعربي والإنجليزي'],
-    },
-    stack: ['Flutter', 'Bloc', 'Riverpod', 'Dio', 'FCM'],
-    role: { en: 'Mobile engineer', ar: 'مهندس موبايل' },
-    play: 'https://play.google.com/store/apps/details?id=com.tqnia.luster',
-    appStore: 'https://apps.apple.com/eg/app/luster-app/id6757190651',
-    status: 'live',
-  },
-  {
     id: 'perfume',
     name: 'Behiry Perfume',
     icon: perfumeIcon,
@@ -279,4 +259,36 @@ export const writing = [
     where: 'YouTube',
     url: 'https://www.youtube.com/playlist?list=PLWjK-c1FkweWssXrz8puOybSqX8klC8Oy',
   },
+];
+
+export const services: { title: L; body: L }[] = [
+  { title: { en: 'Mobile App Development', ar: 'تطوير تطبيقات الموبايل' }, body: { en: 'Production Flutter apps for Android and iOS from one codebase, with native features where they matter.', ar: 'تطبيقات Flutter منشورة على Android و iOS من كود واحد، مع ميزات Native وقت ما تحتاجها.' } },
+  { title: { en: 'Real-time & Calls', ar: 'اللحظي والمكالمات' }, body: { en: 'Chat over WebSockets, voice and video calls with Agora, and calls that ring on the lock screen.', ar: 'شات بالـ WebSockets، ومكالمات صوت وفيديو بـ Agora، ومكالمات بترن على شاشة القفل.' } },
+  { title: { en: 'Backend & API Integration', ar: 'ربط الـ APIs والباك إند' }, body: { en: 'REST, Firebase, payment gateways and maps, plus Spring Boot and PostgreSQL when the project needs its own backend.', ar: 'REST و Firebase وبوابات الدفع والخرايط، و Spring Boot و PostgreSQL لو المشروع محتاج باك إند خاص.' } },
+  { title: { en: 'App Architecture', ar: 'معمارية التطبيق' }, body: { en: 'Clean Architecture with Bloc/Cubit, dependency injection, offline-first storage and code a team can keep working on.', ar: 'Clean Architecture مع Bloc/Cubit، و Dependency Injection، وتخزين بيشتغل من غير نت، وكود الفريق يقدر يكمّل عليه.' } },
+  { title: { en: 'Release & Updates', ar: 'الرفع والتحديثات' }, body: { en: 'App Store and Google Play releases, CI/CD with GitHub Actions, and over-the-air fixes with Shorebird.', ar: 'رفع على App Store و Google Play، و CI/CD بـ GitHub Actions، وتحديثات فورية بـ Shorebird.' } },
+];
+
+export const processSteps: { title: L; body: L; tags: string[] }[] = [
+  { title: { en: 'Understand the product', ar: 'فهم المنتج' }, body: { en: 'Read the requirements and designs, ask the awkward questions early, and agree what "done" means.', ar: 'أقرا المتطلبات والتصميمات، وأسأل الأسئلة الصعبة بدري، ونتفق يعني إيه "خلصت".' }, tags: ['Requirements', 'Figma', 'API contract'] },
+  { title: { en: 'Plan the architecture', ar: 'تخطيط المعمارية' }, body: { en: 'Split the app into features, pick state management and storage, and set up the project so it scales.', ar: 'أقسّم التطبيق features، وأختار إدارة الحالة والتخزين، وأجهّز المشروع بحيث يكبر بسهولة.' }, tags: ['Clean Architecture', 'Bloc', 'DI'] },
+  { title: { en: 'Build feature by feature', ar: 'بناء feature ورا التانية' }, body: { en: 'Pixel-accurate screens, API integration and edge cases like slow networks, empty states and errors.', ar: 'شاشات مطابقة للتصميم، وربط الـ APIs، والحالات الصعبة زي النت البطيء والشاشات الفاضية والأخطاء.' }, tags: ['UI', 'REST', 'WebSockets'] },
+  { title: { en: 'Test and polish', ar: 'اختبار وتحسين' }, body: { en: 'Test on real devices, fix crashes from Crashlytics, and tune performance before release.', ar: 'أجرّب على أجهزة حقيقية، وأصلّح الـ crashes من Crashlytics، وأحسّن الأداء قبل الرفع.' }, tags: ['Testing', 'Crashlytics', 'Performance'] },
+  { title: { en: 'Release and support', ar: 'الرفع والمتابعة' }, body: { en: 'Ship to both stores, automate the pipeline, and push quick fixes over the air after launch.', ar: 'أرفع على الستورين، وأعمل أتمتة للرفع، وأبعت تصليحات سريعة بعد الإطلاق.' }, tags: ['TestFlight', 'Google Play', 'Shorebird'] },
+];
+
+export const certificates: { issuer: string; title: string; area: L; url: string; skills: string[] }[] = [
+  { issuer: 'Harvard', title: "CS50x: Introduction to Computer Science", area: { en: 'Computer science', ar: 'علوم الحاسب' }, url: 'https://cs50.harvard.edu/certificates/456ebd62-4741-49fc-bd87-208991611496', skills: ['C', 'Python', 'Algorithms', 'Data structures', 'SQL'] },
+  { issuer: 'Udemy', title: 'Deep Dive into Clean Architecture in Flutter', area: { en: 'Flutter architecture', ar: 'معمارية Flutter' }, url: 'https://www.udemy.com/certificate/UC-212016fa-102f-483a-8cc3-6412b155a95c/', skills: ['Clean Architecture', 'SOLID', 'Testing'] },
+  { issuer: 'Udemy', title: 'Flutter Advanced Course: Bloc and MVVM Pattern', area: { en: 'State management', ar: 'إدارة الحالة' }, url: 'https://www.udemy.com/certificate/UC-fe1bede9-7c4a-473a-9bf5-a814bce32082/', skills: ['Bloc', 'MVVM', 'Dio'] },
+  { issuer: 'Udemy', title: 'Flutter Payment Integration: Stripe, PayPal', area: { en: 'Payments', ar: 'الدفع' }, url: 'https://www.udemy.com/certificate/UC-01c3d4e6-0481-47a9-9208-b23506473d9c/', skills: ['Stripe', 'PayPal', 'Checkout'] },
+  { issuer: 'ITI', title: 'UI/UX Design', area: { en: 'Product design', ar: 'تصميم المنتج' }, url: 'https://drive.google.com/file/d/1nVGTwiKQTBbm2kq-ENm_ggqXMkxJNBgR/view?usp=drive_link', skills: ['User research', 'Wireframes', 'Prototyping'] },
+];
+
+export const faq: { q: L; a: L }[] = [
+  { q: { en: 'What platforms do you build for?', ar: 'بتعمل تطبيقات لأنهي منصات؟' }, a: { en: 'Android and iOS from a single Flutter codebase. I handle platform-specific work such as push notifications, CallKit, background location and deep links on both.', ar: 'Android و iOS من كود Flutter واحد. وبتعامل مع الحاجات الخاصة بكل منصة زي الإشعارات و CallKit والموقع في الخلفية والـ deep links.' } },
+  { q: { en: 'How do you keep the code maintainable?', ar: 'إزاي بتحافظ إن الكود يفضل سهل التعديل؟' }, a: { en: 'Feature-first Clean Architecture, Bloc/Cubit for state, dependency injection with get_it, and typed error handling, so new people can find their way and features stay isolated.', ar: 'Clean Architecture مقسمة features، و Bloc/Cubit للحالة، و get_it للـ DI، وتعامل واضح مع الأخطاء، فأي حد جديد يلاقي طريقه والـ features متفصلة عن بعض.' } },
+  { q: { en: 'Can you handle payments, maps and offline data?', ar: 'تقدر تشتغل على الدفع والخرايط والداتا من غير نت؟' }, a: { en: 'Yes. I have integrated Stripe, PayPal, Paymob, MyFatoorah and Fawaterak, Google Maps and Mapbox, and built offline-first sync on SQLite.', ar: 'أيوه. ربطت Stripe و PayPal و Paymob و MyFatoorah و Fawaterak، و Google Maps و Mapbox، وعملت sync بيشتغل من غير نت على SQLite.' } },
+  { q: { en: 'Do you publish to the App Store and Google Play?', ar: 'بترفع على App Store و Google Play؟' }, a: { en: 'Yes, including TestFlight, store listings and review fixes. I automate builds with GitHub Actions and ship hotfixes with Shorebird.', ar: 'أيوه، ومعاها TestFlight وصفحات الستور وتصليح ملاحظات المراجعة. وبعمل أتمتة للبناء بـ GitHub Actions وتصليحات سريعة بـ Shorebird.' } },
+  { q: { en: 'Are you open to relocation or remote work?', ar: 'متاح تسافر أو تشتغل ريموت؟' }, a: { en: 'Yes. I am based in Alexandria, Egypt, and open to remote roles, relocation and freelance projects.', ar: 'أيوه. أنا في الإسكندرية، ومتاح للشغل عن بُعد أو الانتقال أو مشاريع فريلانس.' } },
 ];

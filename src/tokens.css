@@ -1,57 +1,67 @@
-/* Layout: a developer's bench. Statement on one side, a live phone on the other; work listed as rows, each app you can open. */
+/* Layout: soft grey canvas, a floating pill nav, white rounded cards; serif headlines with one blue italic word, mono labels. */
 :root {
-  --bg: #eef1f4;
+  --bg: #f7f7f7;
   --surface: #ffffff;
-  --surface-2: #f6f8fa;
-  --ink: #0f1720;
-  --muted: #566170;
-  --line: #d9dfe6;
-  --accent: #0b5fc4;
+  --surface-2: #f2f2f2;
+  --ink: #171717;
+  --head: #0f172a;
+  --muted: #525252;
+  --faint: #a3a3a3;
+  --line: #e7e7e7;
+  --accent: #0284c7;
   --accent-ink: #ffffff;
-  --accent-soft: #e2edfb;
-  --signal: #e8590c;
-  --ok: #16833a;
+  --accent-soft: #e0f2fe;
+  --glow: #fb7c5c;
+  --signal: #ea580c;
+  --ok: #16a34a;
 
-  --f-display: 'Bricolage Grotesque', 'Readex Pro', system-ui, sans-serif;
-  --f-body: 'Readex Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --f-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-  --f-ios: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Readex Pro', system-ui, sans-serif;
+  --f-display: 'Newsreader', 'Noto Naskh Arabic', Georgia, serif;
+  --f-body: 'Inter', 'IBM Plex Sans Arabic', -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --f-ios: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
 
-  --r-sm: 8px;
-  --r-md: 14px;
-  --shadow: 0 1px 2px rgba(15, 23, 32, 0.06), 0 8px 24px rgba(15, 23, 32, 0.06);
+  --r-sm: 10px;
+  --r-md: 18px;
+  --r-lg: 28px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px -12px rgba(0, 0, 0, 0.12);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0b1016;
-    --surface: #131a22;
-    --surface-2: #18212b;
-    --ink: #e7ecf1;
-    --muted: #93a0ae;
-    --line: #253140;
-    --accent: #5ea8ff;
-    --accent-ink: #06121f;
-    --accent-soft: #15283f;
-    --signal: #ff8a4c;
-    --ok: #4cc472;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+    --bg: #0e0f11;
+    --surface: #17191c;
+    --surface-2: #1e2125;
+    --ink: #ececec;
+    --head: #f5f5f5;
+    --muted: #a3a3a3;
+    --faint: #6b6b6b;
+    --line: #2a2d31;
+    --accent: #38bdf8;
+    --accent-ink: #04121b;
+    --accent-soft: #0c2a3a;
+    --glow: #fb7c5c;
+    --signal: #fb923c;
+    --ok: #4ade80;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -12px rgba(0, 0, 0, 0.6);
     color-scheme: dark;
   }
 }
 :root[data-theme='dark'] {
-  --bg: #0b1016;
-  --surface: #131a22;
-  --surface-2: #18212b;
-  --ink: #e7ecf1;
-  --muted: #93a0ae;
-  --line: #253140;
-  --accent: #5ea8ff;
-  --accent-ink: #06121f;
-  --accent-soft: #15283f;
-  --signal: #ff8a4c;
-  --ok: #4cc472;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+  --bg: #0e0f11;
+  --surface: #17191c;
+  --surface-2: #1e2125;
+  --ink: #ececec;
+  --head: #f5f5f5;
+  --muted: #a3a3a3;
+  --faint: #6b6b6b;
+  --line: #2a2d31;
+  --accent: #38bdf8;
+  --accent-ink: #04121b;
+  --accent-soft: #0c2a3a;
+  --glow: #fb7c5c;
+  --signal: #fb923c;
+  --ok: #4ade80;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -12px rgba(0, 0, 0, 0.6);
   color-scheme: dark;
 }
 

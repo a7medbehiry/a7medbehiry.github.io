@@ -1,47 +1,466 @@
-import { useEffect, useState } from 'react';
-import { ArrowUpRight, Download, Mail, Phone, Copy, Check, Play, Github, Linkedin, MapPin, FileText, Globe } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  ArrowUpRight, Download, Linkedin, Github, ChevronLeft, ChevronRight, Play, Mail, Copy, Check, Plus, Smartphone, Zap, Server,
+  Layers, Rocket, ShieldCheck, MessageCircle, Globe,
+} from 'lucide-react';
 import type { Lang } from '../shell/types';
-import { experience, profile, projects, skills, writing } from '../content';
+import { certificates, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
+import { shopsiiaDemo } from '../demos/shopsiia';
+import { salasaDemo } from '../demos/salasa';
+import { letsDemo } from '../demos/lets';
+import { MiniPhone } from './MiniPhone';
+import { tech, PlayMark, AppleMark } from './TechIcons';
 import photo from '../assets/photo.jpg';
-import shopsiiaIcon from '../assets/icons/shopsiia.png';
-import letsIcon from '../assets/icons/magchat.png';
-import salasaIcon from '../assets/icons/salasa.png';
 import './site.css';
 
-const PUSHES = [
-  { demo: 'shopsiia', icon: shopsiiaIcon, app: 'Shopsiia', title: { en: 'Order confirmed', ar: 'تم تأكيد الأوردر' }, body: { en: 'The seller accepted order SH-10503.', ar: 'البائع قبل الأوردر SH-10503.' } },
-  { demo: 'lets', icon: letsIcon, app: "Let's", title: { en: 'Incoming video call', ar: 'مكالمة فيديو جاية' }, body: { en: 'Nada Mostafa is calling you…', ar: 'ندى مصطفى بتتصل بيك…' } },
-  { demo: 'salasa', icon: salasaIcon, app: 'Salasa CRM', title: { en: 'Follow up with Sara Hassan', ar: 'متابعة مع سارة حسن' }, body: { en: 'Demo call in 15 minutes.', ar: 'مكالمة ديمو بعد 15 دقيقة.' } },
+const T = (lang: Lang) => (en: string, ar: string) => (lang === 'ar' ? ar : en);
+
+const carousel = [
+  { demo: shopsiiaDemo, route: { name: 'home' } },
+  { demo: salasaDemo, route: { name: 'dashboard' } },
+  { demo: letsDemo, route: { name: 'list' } },
+  { demo: shopsiiaDemo, route: { name: 'product', params: { id: 'p1' } } },
+  { demo: letsDemo, route: { name: 'chat', params: { id: 'nada' } } },
+  { demo: salasaDemo, route: { name: 'followups' } },
 ];
 
-function StoreBadge({ kind, href, lang }: { kind: 'play' | 'apple' | 'web'; href: string; lang: Lang }) {
-  const label = kind === 'play' ? 'Google Play' : kind === 'apple' ? 'App Store' : lang === 'ar' ? 'الموقع' : 'Website';
+const panel: Record<string, string> = {
+  shopsiia: 'linear-gradient(150deg,#FFE27A,#F9BE00 55%,#F26522)',
+  lets: 'linear-gradient(150deg,#3a1d3f,#170f1a)',
+  homecar: 'linear-gradient(150deg,#d9f2c8,#7fbf5a)',
+  salasa: 'linear-gradient(150deg,#3b5bb5,#172554)',
+  taqy: 'linear-gradient(150deg,#ffe1dc,#f26b5b)',
+  perfume: 'linear-gradient(150deg,#ffd9bf,#f2732a)',
+};
+const demoFor: Record<string, typeof shopsiiaDemo> = { shopsiia: shopsiiaDemo, salasa: salasaDemo, lets: letsDemo };
+const demoRoute: Record<string, { name: string; params?: Record<string, string> }> = {
+  shopsiia: { name: 'home' },
+  salasa: { name: 'dashboard' },
+  lets: { name: 'list' },
+};
+const serviceIcons = [Smartphone, Zap, Server, Layers, Rocket];
+
+function StoreBtn({ kind, href }: { kind: 'apple' | 'play'; href: string }) {
   return (
-    <a className="store" href={href} target="_blank" rel="noopener noreferrer">
-      {kind === 'play' && (
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden><path fill="currentColor" d="M3.6 1.8c-.3.3-.4.7-.4 1.2v18c0 .5.1.9.4 1.2l10-10.2-10-10.2Zm11.1 11.3-2.5 2.6-7.4 7.5c.3 0 .7 0 1-.2l11.7-6.7-2.8-3.2Zm3.9-4.4L15.4 7 6 1.6c-.3-.2-.7-.2-1-.2l7.2 7.4 2.5 2.6 3.9-1.7.1-.1-.1.1Zm.1 0-3.4 3.8 3.4 3.4 2.8-1.6c.8-.5.8-1.8 0-2.3l-2.8-1.6v-1.7Z" /></svg>
-      )}
-      {kind === 'apple' && (
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden><path fill="currentColor" d="M16.4 12.7c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9C6.1 7 4.5 8 3.6 9.6c-1.8 3.1-.5 7.8 1.3 10.4.9 1.3 1.9 2.7 3.2 2.6 1.3 0 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.6 1-1.5 1.4-2.9 1.4-3-.1 0-2.8-1.1-2.8-4.3ZM14 5.2c.7-.8 1.2-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3.1 1.1.1 2.2-.6 2.9-1.4Z" /></svg>
-      )}
-      {kind === 'web' && <Globe size={15} aria-hidden />}
-      <span>{label}</span>
-      <ArrowUpRight size={13} className="flip-rtl" aria-hidden />
+    <a className="store-btn" href={href} target="_blank" rel="noopener noreferrer" dir="ltr">
+      <span className="store-ic">{kind === 'apple' ? <AppleMark /> : <PlayMark />}</span>
+      <span className="store-txt">
+        <small>{kind === 'apple' ? 'Download on the' : 'GET IT ON'}</small>
+        <b>{kind === 'apple' ? 'App Store' : 'Google Play'}</b>
+      </span>
     </a>
   );
 }
 
 export function Site({ lang, setLang, openDemo }: { lang: Lang; setLang: (l: Lang) => void; openDemo: (id: string) => void }) {
-  const t = (en: string, ar: string) => (lang === 'ar' ? ar : en);
-  const [push, setPush] = useState(0);
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    const id = window.setInterval(() => setPush((p) => (p + 1) % PUSHES.length), 3600);
-    return () => window.clearInterval(id);
-  }, []);
+  const t = T(lang);
   const live = projects.filter((p) => p.play && p.appStore).length;
 
-  const copyEmail = async () => {
+  return (
+    <div className="site">
+      <header className="nav-wrap">
+        <nav className="nav" aria-label={t('Main', 'الرئيسية')}>
+          <a href="#top" className="nav-logo">{t('Portfolio', 'بورتفوليو')}</a>
+          <div className="nav-links">
+            <a href="#services">{t('What I Build', 'بعمل إيه')}</a>
+            <a href="#work">{t('Selected Work', 'أعمال مختارة')}</a>
+            <a href="#experience">{t('My Journey', 'رحلتي')}</a>
+            <a href="#credentials">{t('Credentials', 'الشهادات')}</a>
+          </div>
+          <div className="nav-end">
+            <div className="seg" role="group" aria-label={t('Language', 'اللغة')}>
+              <button className={lang === 'en' ? 'on' : ''} onClick={() => setLang('en')}>EN</button>
+              <button className={lang === 'ar' ? 'on' : ''} onClick={() => setLang('ar')}>عربي</button>
+            </div>
+            <a className="pill-dark" href="#contact">{t("Let's Build Together", 'يلا نبدأ')} <ArrowUpRight size={14} className="flip-rtl" aria-hidden /></a>
+          </div>
+        </nav>
+      </header>
+
+      <main id="top">
+        <Hero lang={lang} />
+        <Services lang={lang} />
+        <Latest lang={lang} openDemo={openDemo} live={live} />
+        <Work lang={lang} openDemo={openDemo} />
+        <Journey lang={lang} />
+        <Process lang={lang} />
+        <Credentials lang={lang} />
+        <Faq lang={lang} />
+        <Contact lang={lang} />
+      </main>
+
+      <footer className="foot">
+        <span>{profile.name[lang]} · © {new Date().getFullYear()} {t('All rights reserved.', 'كل الحقوق محفوظة.')}</span>
+        <span>{t('Demos are web recreations of the Flutter apps with sample data.', 'الديموهات نسخ ويب من تطبيقات Flutter ببيانات تجريبية.')}</span>
+        <a href="#top">{t('Back to top ↑', 'لأعلى ↑')}</a>
+      </footer>
+    </div>
+  );
+}
+
+function Hero({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setActive((a) => (a + 1) % tech.length), 2200);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <section className="hero">
+      <div className="hero-copy">
+        <div className="hero-stores" aria-hidden>
+          <span><AppleMark /></span>
+          <span><PlayMark /></span>
+        </div>
+        <h1>
+          Flutter <em>{t('Developer', 'Developer')}</em>
+        </h1>
+        <p className="hero-name">{profile.name[lang]} · {profile.location[lang]}</p>
+        <p className="hero-lede">
+          {t(
+            'I build Android and iOS apps that ship to the stores and hold up in production: e-commerce, real-time chat and calls, on-demand services and business tools. Three of them run right here, so you can try them before we talk.',
+            'ببني تطبيقات Android و iOS بتتنشر على الستور وبتشتغل كويس في الإنتاج: تجارة إلكترونية، وشات ومكالمات لحظية، وخدمات عند الطلب، وأدوات بيزنس. وتلاتة منهم شغالين هنا، تقدر تجربهم قبل ما نتكلم.',
+          )}
+        </p>
+        <div className="hero-actions">
+          <a className="pill-card" href={profile.cv} target="_blank" rel="noopener noreferrer">
+            <Download size={18} aria-hidden />
+            <span><b>{t('Download CV', 'تحميل الـ CV')}</b><small>{t('Resume / CV (PDF)', 'السيرة الذاتية (PDF)')}</small></span>
+          </a>
+          <a className="pill-card" href={profile.linkedin} target="_blank" rel="noopener noreferrer">
+            <span className="li-badge"><Linkedin size={13} aria-hidden /></span>
+            <span><b>LinkedIn</b><small>{t('Connect Profile', 'تواصل معايا')}</small></span>
+          </a>
+        </div>
+      </div>
+
+      <div className="orbit-wrap">
+        <div className="orbit">
+          <div className="orbit-ring" />
+          <div className="orbit-photo"><img src={photo} alt={profile.name[lang]} /></div>
+          {tech.map((x, i) => {
+            const a = (i / tech.length) * Math.PI * 2 - Math.PI / 2;
+            return (
+              <button
+                key={x.name}
+                className={`orbit-ic ${i === active ? 'on' : ''}`}
+                style={{ left: `${50 + Math.cos(a) * 46}%`, top: `${50 + Math.sin(a) * 46}%` }}
+                onClick={() => setActive(i)}
+                aria-label={x.name}
+              >
+                {x.svg}
+              </button>
+            );
+          })}
+        </div>
+        <div className="orbit-caption">
+          <i aria-hidden />
+          <b>{tech[active].name}</b>
+          <span>·</span>
+          <span>{tech[active].label[lang]}</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SecHead({ kicker, title, sub }: { kicker?: string; title: string; sub?: string }) {
+  return (
+    <div className="sec-head">
+      {kicker && <p className="kicker">{kicker}</p>}
+      <h2>{title}</h2>
+      {sub && <p className="sec-sub">{sub}</p>}
+    </div>
+  );
+}
+
+function Services({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  const [active, setActive] = useState(2);
+  useEffect(() => {
+    const id = window.setInterval(() => setActive((a) => (a + 1) % services.length), 3200);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <section className="services" id="services">
+      <p className="kicker center">{t('Tech stack & ecosystem', 'التقنيات والأدوات')}</p>
+      <SecHead
+        title={t('Services & Architecture', 'الخدمات والمعمارية')}
+        sub={t('End-to-end mobile engineering: architecture, accurate UI, integrations and store release.', 'هندسة موبايل كاملة: المعمارية، وواجهات مطابقة للتصميم، والربط مع الأنظمة، والرفع على الستور.')}
+      />
+      <div className="svc-row">
+        {services.map((s, i) => {
+          const I = serviceIcons[i];
+          return (
+            <button key={s.title.en} className={`svc ${i === active ? 'on' : ''}`} onClick={() => setActive(i)}>
+              <b>{s.title[lang]}</b>
+              <span>{s.body[lang]}</span>
+              <i className="svc-ic"><I size={16} aria-hidden /></i>
+            </button>
+          );
+        })}
+      </div>
+      <div className="svc-track" aria-hidden>
+        {services.map((s, i) => (
+          <span key={s.title.en} className={i === active ? 'on' : ''}>{String(i + 1).padStart(2, '0')}</span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Latest({ lang, openDemo, live }: { lang: Lang; openDemo: (id: string) => void; live: number }) {
+  const t = T(lang);
+  const [i, setI] = useState(2);
+  const n = carousel.length;
+  const [w, setW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1200));
+  useEffect(() => {
+    const on = () => setW(window.innerWidth);
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, []);
+  const small = w < 700;
+  const base = small ? 170 : 210;
+  return (
+    <section className="latest" id="projects">
+      <SecHead
+        title={t('Latest Projects', 'أحدث المشاريع')}
+        sub={t('Real screens from my Flutter apps. Tap the phone in the middle to use the app live.', 'شاشات حقيقية من تطبيقاتي. دوس على الموبايل اللي في النص وجرّب التطبيق بنفسك.')}
+      />
+      <div className="car" dir="ltr">
+        <button className="car-arrow l" onClick={() => setI((i - 1 + n) % n)} aria-label={t('Previous', 'السابق')}><ChevronLeft size={18} /></button>
+        <div className="car-stage" style={{ height: base * 2.25 }}>
+          {carousel.map((c, k) => {
+            let d = k - i;
+            if (d > n / 2) d -= n;
+            if (d < -n / 2) d += n;
+            const ad = Math.abs(d);
+            if (ad > (small ? 1 : 2)) return null;
+            const scale = d === 0 ? 1.18 : ad === 1 ? 0.92 : 0.8;
+            const x = d * (small ? base * 0.78 : base * 0.95);
+            return (
+              <button
+                key={k}
+                className={`car-item ${d === 0 ? 'on' : ''}`}
+                style={{ transform: `translateX(calc(-50% + ${x}px)) scale(${scale}) rotateY(${d * -8}deg)`, zIndex: 10 - ad, opacity: ad === 2 ? 0.7 : 1 }}
+                onClick={() => (d === 0 ? openDemo(c.demo.id) : setI(k))}
+                aria-label={d === 0 ? t(`Open the ${c.demo.name} demo`, `افتح ديمو ${c.demo.name}`) : c.demo.name}
+              >
+                <MiniPhone demo={c.demo} route={c.route} lang={lang} width={base} />
+                {d === 0 && <span className="car-cta"><Play size={13} aria-hidden /> {t('Try it live', 'جرّبه دلوقتي')}</span>}
+              </button>
+            );
+          })}
+        </div>
+        <button className="car-arrow r" onClick={() => setI((i + 1) % n)} aria-label={t('Next', 'التالي')}><ChevronRight size={18} /></button>
+      </div>
+      <div className="car-dots" aria-hidden>{carousel.map((_, k) => <i key={k} className={k === i ? 'on' : ''} />)}</div>
+      <p className="mono-hint">{t('Click a phone to explore', 'دوس على أي موبايل')}</p>
+
+      <dl className="stats" id="stats">
+        <div><dt>3<sup>+</sup></dt><dd>{t('Years in Flutter', 'سنين في Flutter')}</dd></div>
+        <div><dt>{live}</dt><dd>{t('Apps on both stores', 'تطبيقات على الستورين')}</dd></div>
+        <div><dt>15<sup>+</sup></dt><dd>{t('Production apps worked on', 'تطبيق اشتغلت عليه')}</dd></div>
+        <div><dt>3</dt><dd>{t('Live demos', 'ديموهات مباشرة')}</dd></div>
+      </dl>
+    </section>
+  );
+}
+
+function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }) {
+  const t = T(lang);
+  const [active, setActive] = useState(projects[0].id);
+  const refs = useRef<Record<string, HTMLElement | null>>({});
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && setActive(e.target.id.replace('p-', ''))),
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    Object.values(refs.current).forEach((el) => el && io.observe(el));
+    return () => io.disconnect();
+  }, []);
+  return (
+    <section className="work" id="work">
+      <SecHead
+        title={t('Projects', 'المشاريع')}
+        sub={t('Production apps I built or co-built, with my role in each. Client names are left out.', 'تطبيقات منشورة بنيتها أو شاركت فيها، ودوري في كل واحد. من غير أسماء العملاء.')}
+      />
+      <div className="work-grid">
+        <ol className="work-index">
+          {projects.map((p, k) => (
+            <li key={p.id}>
+              <a href={`#p-${p.id}`} className={active === p.id ? 'on' : ''}>
+                <span>{String(k + 1).padStart(2, '0')}.</span> {p.name}
+              </a>
+            </li>
+          ))}
+        </ol>
+        <div className="work-cards">
+          {projects.map((p) => (
+            <article key={p.id} id={`p-${p.id}`} ref={(el) => (refs.current[p.id] = el)} className="pcard">
+              <div className="pcard-body">
+                <p className="pcard-kind"><i aria-hidden /> {p.kind[lang]}</p>
+                <h3>{p.name}</h3>
+                <p className="pcard-sum">{p.summary[lang]}</p>
+                <ul className="pcard-points">{p.points[lang].map((x) => <li key={x}>{x}</li>)}</ul>
+                <ul className="pcard-stack">{p.stack.map((s) => <li key={s}>{s}</li>)}</ul>
+                <div className="pcard-links">
+                  {p.demo && (
+                    <button className="demo-btn" onClick={() => openDemo(p.demo!)}>
+                      <Play size={15} aria-hidden /> {t('Try live demo', 'جرّب الديمو')}
+                    </button>
+                  )}
+                  {p.appStore && <StoreBtn kind="apple" href={p.appStore} />}
+                  {p.play && <StoreBtn kind="play" href={p.play} />}
+                  {p.web && (
+                    <a className="web-btn" href={p.web} target="_blank" rel="noopener noreferrer"><Globe size={16} aria-hidden /> {t('Visit website', 'زور الموقع')} <ArrowUpRight size={14} className="flip-rtl" aria-hidden /></a>
+                  )}
+                </div>
+              </div>
+              <div className="pcard-visual" style={{ background: panel[p.id] }}>
+                <span className="tag tl">{p.role[lang]}</span>
+                {p.demo ? (
+                  <button className="pcard-phone" onClick={() => openDemo(p.demo!)} aria-label={t(`Open the ${p.name} demo`, `افتح ديمو ${p.name}`)}>
+                    <MiniPhone demo={demoFor[p.demo]} route={demoRoute[p.demo]} lang={lang} width={190} />
+                  </button>
+                ) : (
+                  <img className="pcard-icon" src={p.icon} alt="" />
+                )}
+                <span className="tag br">{p.status === 'live' ? (p.play ? t('On the stores', 'على الستور') : t('Live', 'شغال')) : t('Live demo', 'ديمو مباشر')}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+      <p className="more-note">{t('Plus more production apps across healthcare, logistics, maps and business tools that I can walk you through in an interview.', 'وتطبيقات منشورة تانية في الصحة واللوجستيات والخرايط وأدوات البيزنس، أقدر أشرحها في الإنترفيو.')}</p>
+    </section>
+  );
+}
+
+function Journey({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  const chapters = [
+    { year: '2020', label: t('Academic foundation', 'البداية الأكاديمية'), role: t('B.Sc. Computer and Information Technology', 'بكالوريوس حاسبات وتكنولوجيا معلومات'), org: t('Zagazig University', 'جامعة الزقازيق'), when: t('2020 – 2024', '2020 – 2024'), note: t('Arabic native · English excellent · German intermediate', 'العربي اللغة الأم · إنجليزي ممتاز · ألماني متوسط'), points: [t('Studied software engineering and IT, and started building Flutter apps alongside university.', 'درست هندسة البرمجيات وتكنولوجيا المعلومات، وبدأت أبني تطبيقات Flutter جنب الجامعة.')] },
+    ...[...experience].reverse().map((e) => ({ year: e.when.en.match(/\d{4}/)![0], label: e.org, role: e.role[lang], org: e.org, when: e.when[lang], note: e.note[lang], points: e.points[lang] })),
+  ];
+  const [i, setI] = useState(chapters.length - 1);
+  const c = chapters[i];
+  return (
+    <section className="journey" id="experience">
+      <SecHead title={t('Experience', 'الخبرة')} sub={t('From university to production apps used by real customers.', 'من الجامعة لتطبيقات منشورة بيستخدمها عملاء حقيقيين.')} />
+      <div className="years" role="tablist">
+        {chapters.map((ch, k) => (
+          <button key={ch.label + k} role="tab" aria-selected={k === i} className={k === i ? 'on' : ''} onClick={() => setI(k)}>
+            <b>{ch.year}</b>
+            <span>{ch.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="chapter" key={i}>
+        <p className="kicker">{c.when}</p>
+        <h3>{c.role} <span>· {c.org}</span></h3>
+        <p className="chapter-note">{c.note}</p>
+        <ul>{c.points.map((x) => <li key={x}>{x}</li>)}</ul>
+      </div>
+    </section>
+  );
+}
+
+function Process({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  return (
+    <section className="process" id="process">
+      <SecHead title={t('Process', 'طريقة الشغل')} sub={t('How I take a feature from a design file to the stores.', 'إزاي باخد الـ feature من ملف التصميم لحد الستور.')} />
+      <ol className="steps">
+        {processSteps.map((s, k) => (
+          <li key={s.title.en}>
+            <p className="kicker">{t('Phase', 'مرحلة')} {String(k + 1).padStart(2, '0')}</p>
+            <h3>{s.title[lang]}</h3>
+            <p>{s.body[lang]}</p>
+            <ul>{s.tags.map((x) => <li key={x}>{x}</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function Credentials({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  const [i, setI] = useState(0);
+  const c = certificates[i];
+  return (
+    <section className="creds" id="credentials">
+      <SecHead title={t('Credentials', 'الشهادات')} sub={t('Courses and certificates behind the hands-on work.', 'كورسات وشهادات ورا الشغل العملي.')} />
+      <div className="cred-tabs" role="tablist">
+        {certificates.map((x, k) => (
+          <button key={x.title} role="tab" aria-selected={k === i} className={k === i ? 'on' : ''} onClick={() => setI(k)}>{x.issuer}</button>
+        ))}
+      </div>
+      <div className="cred-card" key={i}>
+        <div className="cred-main">
+          <p className="kicker"><span className="dot" aria-hidden /> {c.issuer} · {c.area[lang]} <span className="verified"><ShieldCheck size={13} aria-hidden /> {t('Verified', 'موثقة')}</span></p>
+          <h3>{c.title}</h3>
+          <a className="pill-dark" href={c.url} target="_blank" rel="noopener noreferrer">{t('Verify credential', 'تحقق من الشهادة')} <ArrowUpRight size={14} className="flip-rtl" aria-hidden /></a>
+        </div>
+        <div className="cred-side">
+          <p className="kicker">{t('Skills', 'المهارات')}</p>
+          <ul>{c.skills.map((s) => <li key={s}>{s}</li>)}</ul>
+        </div>
+      </div>
+
+      <div className="skills-strip">
+        {skills.map((g) => (
+          <div key={g.group.en}>
+            <p className="kicker">{g.group[lang]}</p>
+            <p>{g.items.join(' · ')}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="writing">
+        <p className="kicker">{t('Writing & teaching', 'مقالات وشرح')}</p>
+        <ul>
+          {writing.map((w) => (
+            <li key={w.url}>
+              <a href={w.url} target="_blank" rel="noopener noreferrer">
+                <span>{w.title[lang]}</span>
+                <small>{w.where}</small>
+                <ArrowUpRight size={15} className="flip-rtl" aria-hidden />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function Faq({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  const [open, setOpen] = useState(0);
+  return (
+    <section className="faq" id="faq">
+      <SecHead title={t('Before We Start', 'قبل ما نبدأ')} sub={t('Short answers to the questions that usually come first.', 'إجابات قصيرة على الأسئلة اللي بتيجي في الأول.')} />
+      <div className="faq-list">
+        {faq.map((f, k) => (
+          <div key={f.q.en} className={`faq-item ${open === k ? 'on' : ''}`}>
+            <button id={`faq-${k}`} aria-expanded={open === k} onClick={() => setOpen(open === k ? -1 : k)}>
+              <span>{f.q[lang]}</span>
+              <Plus size={18} aria-hidden />
+            </button>
+            {open === k && <p>{f.a[lang]}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Contact({ lang }: { lang: Lang }) {
+  const t = T(lang);
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
     try {
       await navigator.clipboard.writeText(profile.email);
       setCopied(true);
@@ -49,222 +468,43 @@ export function Site({ lang, setLang, openDemo }: { lang: Lang; setLang: (l: Lan
     } catch {
       const el = document.getElementById('contact-email');
       if (el) {
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel?.removeAllRanges();
-        sel?.addRange(range);
+        const r = document.createRange();
+        r.selectNodeContents(el);
+        const s = window.getSelection();
+        s?.removeAllRanges();
+        s?.addRange(r);
       }
     }
   };
-
-  const p = PUSHES[push];
   return (
-    <div className="site">
-      <header className="top">
-        <a className="mark" href="#top" aria-label={profile.name[lang]}>
-          <span className="mark-badge">AB</span>
-          <span className="mark-name">{profile.name[lang]}</span>
-        </a>
-        <nav className="top-nav" aria-label={t('Sections', 'الأقسام')}>
-          <a href="#work">{t('Work', 'الأعمال')}</a>
-          <a href="#experience">{t('Experience', 'الخبرة')}</a>
-          <a href="#skills">{t('Skills', 'المهارات')}</a>
-          <a href="#contact">{t('Contact', 'تواصل')}</a>
-        </nav>
-        <div className="top-end">
-          <button className="lang" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')} aria-label={t('Switch to Arabic', 'Switch to English')}>
-            {lang === 'en' ? 'عربي' : 'EN'}
-          </button>
-          <a className="btn small" href={profile.cv} target="_blank" rel="noopener noreferrer">
-            <Download size={15} aria-hidden /> CV
-          </a>
-        </div>
-      </header>
-
-      <main id="top">
-        <section className="hero">
-          <div className="hero-text">
-            <p className="eyebrow">
-              <span className="live-dot" aria-hidden /> {t('Available for full-time roles and freelance', 'متاح لوظيفة دوام كامل أو فريلانس')}
-            </p>
-            <h1>
-              {t('Flutter apps you can try', 'تطبيقات Flutter تقدر تجربها')}
-              <br />
-              <em>{t('before you hire me.', 'قبل ما تشغّلني.')}</em>
-            </h1>
-            <p className="lede">
-              {t(
-                "I'm Ahmed Behiry, a Flutter developer with 3 years of building Android and iOS apps for e-commerce, real-time chat and calls, on-demand services and business tools. Several are live on the stores; three of them run right here in your browser.",
-                'أنا أحمد بحيري، مطور Flutter بخبرة 3 سنين في بناء تطبيقات Android و iOS للتجارة الإلكترونية والشات والمكالمات اللحظية وخدمات عند الطلب وأدوات البيزنس. أكتر من تطبيق منشور على الستور، وتلاتة منهم تقدر تجربهم هنا في المتصفح.',
-              )}
-            </p>
-            <div className="hero-cta">
-              <a className="btn" href="#work">
-                <Play size={16} aria-hidden /> {t('Try a live demo', 'جرّب ديمو')}
-              </a>
-              <a className="btn ghost" href="#contact">{t('Get in touch', 'تواصل معايا')}</a>
-            </div>
-            <dl className="facts">
-              <div><dt>3</dt><dd>{t('years shipping Flutter', 'سنين في Flutter')}</dd></div>
-              <div><dt>{live}</dt><dd>{t('apps on Google Play and the App Store', 'تطبيقات على Google Play و App Store')}</dd></div>
-              <div><dt>3</dt><dd>{t('interactive demos', 'ديموهات تفاعلية')}</dd></div>
-            </dl>
-          </div>
-
-          <div className="hero-visual">
-            <div className="portrait">
-              <img src={photo} alt={profile.name[lang]} />
-              <span className="portrait-loc"><MapPin size={14} aria-hidden /> {t('Alexandria, Egypt', 'الإسكندرية، مصر')}</span>
-            </div>
-            <button key={push} className="push" onClick={() => openDemo(p.demo)} aria-label={t(`Open the ${p.app} demo`, `افتح ديمو ${p.app}`)}>
-              <img src={p.icon} alt="" />
-              <span className="push-text">
-                <span className="push-top"><b>{p.app}</b><span>{t('now', 'الآن')}</span></span>
-                <span className="push-title">{p.title[lang]}</span>
-                <span className="push-body">{p.body[lang]}</span>
-              </span>
-            </button>
-            <p className="push-hint">{t('Tap the notification to open that app.', 'دوس على الإشعار يفتحلك التطبيق.')}</p>
-          </div>
-        </section>
-
-        <section className="work" id="work" aria-labelledby="work-h">
-          <div className="sec-head">
-            <h2 id="work-h">{t('Selected work', 'أعمال مختارة')}</h2>
-            <p>{t('Apps on the stores, and demos you can use without installing anything. Demos run on sample data.', 'تطبيقات منشورة على الستور، وديموهات تجربها من غير ما تنزّل حاجة. الديموهات شغالة ببيانات تجريبية.')}</p>
-          </div>
-          <ol className="projects">
-            {projects.map((pr) => (
-              <li key={pr.id} className={`project ${pr.demo ? 'has-demo' : ''}`}>
-                <div className="project-id">
-                  <img className="app-icon" src={pr.icon} alt="" />
-                  <div>
-                    <h3>{pr.name}</h3>
-                    <p className="kind">{pr.kind[lang]}</p>
-                  </div>
-                  <span className={`state ${pr.status}`}>
-                    {pr.status === 'live' ? (pr.play ? t('On the stores', 'على الستور') : t('Live', 'شغال')) : t('Live demo', 'ديمو مباشر')}
-                  </span>
-                </div>
-                <div className="project-body">
-                  <p className="summary">{pr.summary[lang]}</p>
-                  <ul className="points">
-                    {pr.points[lang].map((pt) => <li key={pt}>{pt}</li>)}
-                  </ul>
-                  <div className="project-foot">
-                    <ul className="stack" aria-label={t('Built with', 'معمول بـ')}>
-                      {pr.stack.map((s) => <li key={s}>{s}</li>)}
-                    </ul>
-                    <p className="role">{pr.role[lang]}</p>
-                  </div>
-                  <div className="links">
-                    {pr.demo && (
-                      <button className="btn demo" onClick={() => openDemo(pr.demo!)}>
-                        <Play size={15} aria-hidden /> {t('Try the demo', 'جرّب الديمو')}
-                      </button>
-                    )}
-                    {pr.play && <StoreBadge kind="play" href={pr.play} lang={lang} />}
-                    {pr.appStore && <StoreBadge kind="apple" href={pr.appStore} lang={lang} />}
-                    {pr.web && <StoreBadge kind="web" href={pr.web} lang={lang} />}
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ol>
-          <p className="more">
+    <section className="contact" id="contact">
+      <div className="contact-card">
+        <img className="contact-photo" src={photo} alt="" />
+        <div className="contact-body">
+          <h2>{t("I'm Ahmed Behiry", 'أنا أحمد بحيري')}</h2>
+          <p className="kicker">{t('Flutter Developer', 'مطور Flutter')}</p>
+          <p className="contact-text">
             {t(
-              'Plus more production apps across healthcare, logistics, maps and business tools that I can walk you through in an interview.',
-              'وتطبيقات منشورة تانية في الصحة واللوجستيات والخرايط وأدوات البيزنس، أقدر أشرحها في الإنترفيو.',
+              'A Flutter developer who cares about clean architecture and apps that feel fast, from the first screen to the store release. Open to full-time roles, remote work, relocation and freelance projects.',
+              'مطور Flutter بيهتم بالمعمارية النضيفة وبتطبيقات سريعة، من أول شاشة لحد الرفع على الستور. متاح لوظيفة دوام كامل أو شغل عن بُعد أو انتقال أو فريلانس.',
             )}
           </p>
-        </section>
-
-        <section className="exp" id="experience" aria-labelledby="exp-h">
-          <div className="sec-head">
-            <h2 id="exp-h">{t('Experience', 'الخبرة')}</h2>
+          <div className="contact-actions">
+            <span className="mail-pill">
+              <Mail size={16} aria-hidden />
+              <span id="contact-email" dir="ltr">{profile.email}</span>
+              <button onClick={copy} aria-label={t('Copy email', 'انسخ الإيميل')}>{copied ? <Check size={15} /> : <Copy size={15} />}</button>
+            </span>
+            <a className="pill-dark wa" href={profile.whatsapp} target="_blank" rel="noopener noreferrer"><MessageCircle size={16} aria-hidden /> {t('Chat on WhatsApp', 'كلمني واتساب')}</a>
           </div>
-          <ol className="timeline">
-            {experience.map((e) => (
-              <li key={e.org}>
-                <div className="when">{e.when[lang]}</div>
-                <div className="what">
-                  <h3>{e.role[lang]} <span>· {e.org}</span></h3>
-                  <p className="note">{e.note[lang]}</p>
-                  <ul>{e.points[lang].map((x) => <li key={x}>{x}</li>)}</ul>
-                </div>
-              </li>
-            ))}
-            <li>
-              <div className="when">{t('2020 – 2024', '2020 – 2024')}</div>
-              <div className="what">
-                <h3>{t('B.Sc. Computer and Information Technology', 'بكالوريوس حاسبات وتكنولوجيا معلومات')} <span>· {t('Zagazig University', 'جامعة الزقازيق')}</span></h3>
-                <p className="note">{t('Arabic native · English excellent · German intermediate', 'العربي اللغة الأم · إنجليزي ممتاز · ألماني متوسط')}</p>
-              </div>
-            </li>
-          </ol>
-        </section>
-
-        <section className="skills" id="skills" aria-labelledby="skills-h">
-          <div className="sec-head">
-            <h2 id="skills-h">{t('Skills', 'المهارات')}</h2>
+          <div className="contact-social">
+            <a href={profile.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin size={16} aria-hidden /> LinkedIn</a>
+            <a href={profile.github} target="_blank" rel="noopener noreferrer"><Github size={16} aria-hidden /> GitHub</a>
+            <a href={profile.cv} target="_blank" rel="noopener noreferrer"><Download size={16} aria-hidden /> CV</a>
+            <span dir="ltr">{profile.phone}</span>
           </div>
-          <div className="skill-grid">
-            {skills.map((g) => (
-              <div key={g.group.en} className="skill">
-                <h3>{g.group[lang]}</h3>
-                <ul>{g.items.map((s) => <li key={s}>{s}</li>)}</ul>
-              </div>
-            ))}
-          </div>
-          <div className="writing">
-            <h3>{t('Writing and teaching', 'مقالات وشرح')}</h3>
-            <ul>
-              {writing.map((w) => (
-                <li key={w.url}>
-                  <a href={w.url} target="_blank" rel="noopener noreferrer">
-                    <FileText size={16} aria-hidden />
-                    <span>{w.title[lang]}</span>
-                    <small>{w.where}</small>
-                    <ArrowUpRight size={14} className="flip-rtl" aria-hidden />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section className="contact" id="contact" aria-labelledby="contact-h">
-          <div className="contact-card">
-            <h2 id="contact-h">{t("Let's build your next app.", 'يلا نبني تطبيقك الجاي.')}</h2>
-            <p>{t('Open to full-time roles, remote work, relocation and freelance projects.', 'متاح لوظيفة دوام كامل، أو شغل عن بُعد، أو انتقال، أو مشاريع فريلانس.')}</p>
-            <div className="contact-rows">
-              <div className="contact-row">
-                <Mail size={18} aria-hidden />
-                <span id="contact-email" dir="ltr">{profile.email}</span>
-                <button className="copy" onClick={copyEmail}>
-                  {copied ? <Check size={15} aria-hidden /> : <Copy size={15} aria-hidden />} {copied ? t('Copied', 'اتنسخ') : t('Copy', 'نسخ')}
-                </button>
-              </div>
-              <div className="contact-row">
-                <Phone size={18} aria-hidden />
-                <span dir="ltr">{profile.phone}</span>
-                <a className="copy" href={profile.whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight size={13} className="flip-rtl" aria-hidden /></a>
-              </div>
-            </div>
-            <div className="contact-links">
-              <a className="btn" href={profile.linkedin} target="_blank" rel="noopener noreferrer"><Linkedin size={16} aria-hidden /> LinkedIn</a>
-              <a className="btn ghost" href={profile.github} target="_blank" rel="noopener noreferrer"><Github size={16} aria-hidden /> GitHub</a>
-              <a className="btn ghost" href={profile.cv} target="_blank" rel="noopener noreferrer"><Download size={16} aria-hidden /> {t('Download CV', 'تحميل الـ CV')}</a>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="foot">
-        <span>© {new Date().getFullYear()} {profile.name[lang]}</span>
-        <span>{t('Demos are web recreations of the Flutter apps, with sample data.', 'الديموهات نسخ ويب من تطبيقات Flutter ببيانات تجريبية.')}</span>
-      </footer>
-    </div>
+        </div>
+      </div>
+    </section>
   );
 }
