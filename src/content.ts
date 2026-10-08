@@ -4,6 +4,9 @@ import letsIcon from './assets/icons/magchat.png';
 import homecarIcon from './assets/icons/homecar.png';
 import taqyIcon from './assets/icons/taqy.png';
 import perfumeIcon from './assets/icons/perfume.png';
+import rent2goIcon from './assets/icons/rent2go.png';
+import carfiIcon from './assets/icons/cargo.png';
+import afdlIcon from './assets/icons/afdl.png';
 
 type L = { en: string; ar: string };
 
@@ -342,4 +345,12 @@ export const faq: { q: L; a: L }[] = [
   { q: { en: 'Can you handle payments, maps and offline data?', ar: 'تقدر تشتغل على الدفع والخرايط والداتا من غير نت؟' }, a: { en: 'Yes. I have integrated Stripe, PayPal, Paymob, MyFatoorah and Fawaterak, Google Maps and Mapbox, and built offline-first sync on SQLite.', ar: 'أيوه. ربطت Stripe و PayPal و Paymob و MyFatoorah و Fawaterak، و Google Maps و Mapbox، وعملت sync بيشتغل من غير نت على SQLite.' } },
   { q: { en: 'Do you publish to the App Store and Google Play?', ar: 'بترفع على App Store و Google Play؟' }, a: { en: 'Yes, including TestFlight, store listings and review fixes. I automate builds with GitHub Actions and ship hotfixes with Shorebird.', ar: 'أيوه، ومعاها TestFlight وصفحات الستور وتصليح ملاحظات المراجعة. وبعمل أتمتة للبناء بـ GitHub Actions وتصليحات سريعة بـ Shorebird.' } },
   { q: { en: 'Are you open to relocation or remote work?', ar: 'متاح تسافر أو تشتغل ريموت؟' }, a: { en: 'Yes. I am based in Alexandria, Egypt, and open to remote roles, relocation and freelance projects.', ar: 'أيوه. أنا في الإسكندرية، ومتاح للشغل عن بُعد أو الانتقال أو مشاريع فريلانس.' } },
+];
+
+export const alsoShipped: { name: string; icon: string; kind: L }[] = [
+  { name: 'Ren2Go Client', icon: rent2goIcon, kind: { en: 'Car rental marketplace', ar: 'سوق إيجار عربيات' } },
+  { name: 'Ren2Go Owner', icon: rent2goIcon, kind: { en: 'Fleet owner app with chat', ar: 'تطبيق المالك وفيه شات' } },
+  { name: 'Car-Fi User', icon: carfiIcon, kind: { en: 'Car services', ar: 'خدمات العربيات' } },
+  { name: 'Car-Fi Owner', icon: carfiIcon, kind: { en: 'Service provider app', ar: 'تطبيق مقدم الخدمة' } },
+  { name: 'Afdl', icon: afdlIcon, kind: { en: 'Classifieds marketplace', ar: 'سوق إعلانات' } },
 ];

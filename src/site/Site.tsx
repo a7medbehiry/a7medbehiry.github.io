@@ -4,7 +4,7 @@ import {
   Layers, Rocket, ShieldCheck, MessageCircle, Globe,
 } from 'lucide-react';
 import type { Lang } from '../shell/types';
-import { certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
+import { alsoShipped, certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
 import { shopsiiaDemo } from '../demos/shopsiia';
 import { salasaDemo } from '../demos/salasa';
 import { letsDemo } from '../demos/lets';
@@ -60,7 +60,6 @@ function StoreBtn({ kind, href }: { kind: 'apple' | 'play'; href: string }) {
 
 export function Site({ lang, setLang, openDemo }: { lang: Lang; setLang: (l: Lang) => void; openDemo: (id: string) => void }) {
   const t = T(lang);
-  const live = projects.filter((p) => p.play && p.appStore).length;
 
   return (
     <div className="site">
@@ -86,7 +85,7 @@ export function Site({ lang, setLang, openDemo }: { lang: Lang; setLang: (l: Lan
       <main id="top">
         <Hero lang={lang} />
         <Services lang={lang} />
-        <Latest lang={lang} openDemo={openDemo} live={live} />
+        <Latest lang={lang} openDemo={openDemo} />
         <Work lang={lang} openDemo={openDemo} />
         <Journey lang={lang} />
         <Process lang={lang} />
@@ -215,7 +214,7 @@ function Services({ lang }: { lang: Lang }) {
   );
 }
 
-function Latest({ lang, openDemo, live }: { lang: Lang; openDemo: (id: string) => void; live: number }) {
+function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }) {
   const t = T(lang);
   const [i, setI] = useState(2);
   const n = carousel.length;
@@ -265,8 +264,8 @@ function Latest({ lang, openDemo, live }: { lang: Lang; openDemo: (id: string) =
 
       <dl className="stats" id="stats">
         <div><dt>3<sup>+</sup></dt><dd>{t('Years in Flutter', 'سنين في Flutter')}</dd></div>
-        <div><dt>{live}</dt><dd>{t('Apps on both stores', 'تطبيقات على الستورين')}</dd></div>
-        <div><dt>15<sup>+</sup></dt><dd>{t('Production apps worked on', 'تطبيق اشتغلت عليه')}</dd></div>
+        <div><dt>15<sup>+</sup></dt><dd>{t('Apps live on the stores', 'تطبيق منشور على الستور')}</dd></div>
+        <div><dt>25<sup>+</sup></dt><dd>{t('Flutter apps worked on', 'تطبيق Flutter اشتغلت عليه')}</dd></div>
         <div><dt>3</dt><dd>{t('Live demos', 'ديموهات مباشرة')}</dd></div>
       </dl>
     </section>
@@ -338,7 +337,18 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
           ))}
         </div>
       </div>
-      <p className="more-note">{t('Plus more production apps across healthcare, logistics, maps and business tools that I can walk you through in an interview.', 'وتطبيقات منشورة تانية في الصحة واللوجستيات والخرايط وأدوات البيزنس، أقدر أشرحها في الإنترفيو.')}</p>
+      <div className="also">
+        <p className="kicker">{t('Also shipped to the stores', 'منشور برضه على الستور')}</p>
+        <ul>
+          {alsoShipped.map((a) => (
+            <li key={a.name}>
+              <img src={a.icon} alt="" />
+              <span><b>{a.name}</b><small>{a.kind[lang]}</small></span>
+            </li>
+          ))}
+        </ul>
+        <p className="more-note">{t('Plus maintenance and new features on more production apps in healthcare, logistics, investment, maps and business management.', 'وكمان صيانة و features جديدة في تطبيقات منشورة تانية في الصحة واللوجستيات والاستثمار والخرايط وإدارة البيزنس.')}</p>
+      </div>
     </section>
   );
 }

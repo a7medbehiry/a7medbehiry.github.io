@@ -33,7 +33,11 @@ function App() {
   useEffect(() => {
     const onHash = () => setDemo(demoFromHash());
     window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
+    window.addEventListener('popstate', onHash);
+    return () => {
+      window.removeEventListener('hashchange', onHash);
+      window.removeEventListener('popstate', onHash);
+    };
   }, []);
 
   useEffect(() => {
@@ -50,14 +54,22 @@ function App() {
     }
   };
 
+  // Update the address bar without relying on it: some embeds block hash navigation.
+  const setUrl = (hash: string) => {
+    try {
+      window.history.pushState(null, '', hash ? `#${hash}` : window.location.pathname + window.location.search);
+    } catch {
+      /* the view still switches */
+    }
+  };
   const openDemo = (id: string) => {
-    window.location.hash = `demo-${id}`;
     setDemo(id);
+    setUrl(`demo-${id}`);
     window.scrollTo(0, 0);
   };
   const exit = () => {
-    window.location.hash = 'work';
     setDemo(null);
+    setUrl('');
     window.setTimeout(() => document.getElementById('work')?.scrollIntoView(), 0);
   };
 
