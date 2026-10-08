@@ -277,12 +277,63 @@ export const processSteps: { title: L; body: L; tags: string[] }[] = [
   { title: { en: 'Release and support', ar: 'الرفع والمتابعة' }, body: { en: 'Ship to both stores, automate the pipeline, and push quick fixes over the air after launch.', ar: 'أرفع على الستورين، وأعمل أتمتة للرفع، وأبعت تصليحات سريعة بعد الإطلاق.' }, tags: ['TestFlight', 'Google Play', 'Shorebird'] },
 ];
 
-export const certificates: { issuer: string; title: string; area: L; url: string; skills: string[] }[] = [
-  { issuer: 'Harvard', title: "CS50x: Introduction to Computer Science", area: { en: 'Computer science', ar: 'علوم الحاسب' }, url: 'https://cs50.harvard.edu/certificates/456ebd62-4741-49fc-bd87-208991611496', skills: ['C', 'Python', 'Algorithms', 'Data structures', 'SQL'] },
-  { issuer: 'Udemy', title: 'Deep Dive into Clean Architecture in Flutter', area: { en: 'Flutter architecture', ar: 'معمارية Flutter' }, url: 'https://www.udemy.com/certificate/UC-212016fa-102f-483a-8cc3-6412b155a95c/', skills: ['Clean Architecture', 'SOLID', 'Testing'] },
-  { issuer: 'Udemy', title: 'Flutter Advanced Course: Bloc and MVVM Pattern', area: { en: 'State management', ar: 'إدارة الحالة' }, url: 'https://www.udemy.com/certificate/UC-fe1bede9-7c4a-473a-9bf5-a814bce32082/', skills: ['Bloc', 'MVVM', 'Dio'] },
-  { issuer: 'Udemy', title: 'Flutter Payment Integration: Stripe, PayPal', area: { en: 'Payments', ar: 'الدفع' }, url: 'https://www.udemy.com/certificate/UC-01c3d4e6-0481-47a9-9208-b23506473d9c/', skills: ['Stripe', 'PayPal', 'Checkout'] },
-  { issuer: 'ITI', title: 'UI/UX Design', area: { en: 'Product design', ar: 'تصميم المنتج' }, url: 'https://drive.google.com/file/d/1nVGTwiKQTBbm2kq-ENm_ggqXMkxJNBgR/view?usp=drive_link', skills: ['User research', 'Wireframes', 'Prototyping'] },
+export interface Cert {
+  title: string;
+  issuer: string;
+  url: string;
+}
+
+export const featuredCerts: { title: L; issuer: string; note: L; url: string; image: 'cs50' | 'performance' | 'best-employee' }[] = [
+  { title: { en: 'CS50x: Introduction to Computer Science', ar: 'CS50x: مقدمة في علوم الحاسب' }, issuer: 'Harvard University', note: { en: 'Ten problem sets, nine labs and a final project.', ar: 'عشر مسائل وتسع معامل ومشروع نهائي.' }, url: 'https://cs50.harvard.edu/certificates/456ebd62-4741-49fc-bd87-208991611496', image: 'cs50' },
+  { title: { en: 'Performance Recognition', ar: 'تكريم على الأداء' }, issuer: 'Tqnia IT', note: { en: 'Recognised for my work as a Flutter developer.', ar: 'تكريم على شغلي كمطور Flutter.' }, url: 'https://drive.google.com/file/d/1bQrENss8yM84gFOMx-Ig_MLUh6tcQ82p/view?usp=sharing', image: 'performance' },
+  { title: { en: 'Best Employee of the Month', ar: 'أفضل موظف في الشهر' }, issuer: 'Webbing Agency', note: { en: 'Awarded while building e-commerce and logistics apps.', ar: 'وأنا ببني تطبيقات تجارة إلكترونية ولوجستيات.' }, url: 'https://drive.google.com/file/d/1m7W_g4lOCmxvyGmIqwo_-7Fk1HXRIa0/view?usp=sharing', image: 'best-employee' },
+];
+
+export const experienceCertUrl = 'https://drive.google.com/file/d/1wKYp0aphcUD4AbEE_9YnwPGKcSQzTCwB/view?usp=sharing';
+
+export const certGroups: { id: string; name: L; items: Cert[] }[] = [
+  {
+    id: 'flutter',
+    name: { en: 'Flutter & Software Engineering', ar: 'Flutter وهندسة البرمجيات' },
+    items: [
+      { title: 'CS50x: Introduction to Computer Science', issuer: 'Harvard', url: 'https://cs50.harvard.edu/certificates/456ebd62-4741-49fc-bd87-208991611496' },
+      { title: 'Mastering Programming: A Comprehensive Course (Dart)', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-54834017-c3de-4772-9c8e-2cc1643ad96b/' },
+      { title: 'Complete Flutter & Dart Development Course', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-c807ce73-5fd3-4816-8b1d-898abf085209/' },
+      { title: 'Flutter Advanced Course: Bloc and MVVM Pattern', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-218f7578-629c-4717-95e3-d891a8b16142/' },
+      { title: 'Deep Dive into Clean Architecture in Flutter', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-fe1bede9-7c4a-473a-9bf5-a814bce32082/' },
+      { title: 'Flutter Payment Integration: Stripe, PayPal', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-212016fa-102f-483a-8cc3-6412b155a95c/' },
+      { title: 'Mastering Flutter: Responsive & Adaptive UI Design', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-01c3d4e6-0481-47a9-9208-b23506473d9c/' },
+      { title: 'Flutter & Firebase: Build Your Own E-Commerce', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-64e3031e-3fe4-4580-86eb-a5fba36003f0/' },
+      { title: 'Flutter App Creation: Google Maps Integration Guide', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-3c35d384-d4c9-46ca-abd6-10323c7e55e0/' },
+    ],
+  },
+  {
+    id: 'design',
+    name: { en: 'Design, Product & Business', ar: 'التصميم والمنتج والبيزنس' },
+    items: [
+      { title: 'UI/UX Design', issuer: 'ITI', url: 'https://drive.google.com/file/d/1nVGTwiKQTBbm2kq-ENm_ggqXMkxJNBgR/view?usp=drive_link' },
+      { title: 'UX Design Fundamentals', issuer: '', url: 'https://drive.google.com/file/d/1BtssA25rJtQP7k9MI-7QJCdc5sUmacJm/view?usp=sharing' },
+      { title: 'Web Design', issuer: 'Udemy', url: 'https://drive.google.com/file/d/1hV2aL_SgPQpzXRAbdcN9YZb9N-lnb2-i/view?usp=drive_link' },
+      { title: 'Web Development', issuer: 'Udacity', url: 'https://drive.google.com/file/d/1tMh3Czy55zLvpbWQog68ahvDRP8tjUWq/view?usp=drive_link' },
+      { title: 'Digital Marketing', issuer: 'Udacity', url: 'https://drive.google.com/file/d/1dEhZR8CUd2RUUbdIJgjQWF_FNVyhELFu/view?usp=drive_link' },
+      { title: 'Photoshop for Beginners', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-6541218f-9975-4041-9940-f075814f2631/' },
+      { title: 'Professional Adobe Photoshop', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-23b2d06a-280d-4118-97cb-f8cd1e034cb4/' },
+      { title: 'Video Editing with Adobe Premiere', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-748bd1ee-e45f-4cd2-9353-8c58bef86f16/' },
+    ],
+  },
+  {
+    id: 'more',
+    name: { en: 'Additional Technical Learning', ar: 'تعلم تقني إضافي' },
+    items: [
+      { title: 'CCNA', issuer: 'Cisco', url: 'https://drive.google.com/file/d/1e9mWIuzCapCT6J1fISeqEM_9yTmJou8w/view?usp=drive_link' },
+      { title: 'ICDL', issuer: 'Misr Public Library', url: 'https://drive.google.com/file/d/1an9iP1n_lm-WD6MYt53OzXqgPc1EfkkP/view?usp=drive_link' },
+      { title: 'Java Programming Language', issuer: 'TeraCourses', url: 'https://drive.google.com/file/d/1OjkM0iN5WuI0kPow3tQMuPexeJABQIc5/view?usp=sharing' },
+      { title: 'Theoretical and Practical Understanding of Java', issuer: 'SoloLearn', url: 'https://drive.google.com/file/d/1a8hyCGxetr5gIQ8EjoRJIw7Z7Z8yLNBb/view?usp=sharing' },
+      { title: 'Python Programming Language', issuer: 'Udemy', url: 'https://www.udemy.com/certificate/UC-da6aa825-2051-429e-8ddc-f91d92bc8257/' },
+      { title: 'AI Fluency: Framework & Foundations', issuer: 'Anthropic', url: 'https://drive.google.com/file/d/15DJeEQlklyusF1I1ThrQM19hnAapbfxu/view?usp=sharing' },
+      { title: 'Build Your Own Chatbot', issuer: 'Cognitive Class', url: 'https://drive.google.com/file/d/1YgUlEgorA3Md0NphUHip_a5oHSYRgxhs/view?usp=drive_link' },
+    ],
+  },
 ];
 
 export const faq: { q: L; a: L }[] = [

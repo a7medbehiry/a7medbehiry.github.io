@@ -4,13 +4,19 @@ import {
   Layers, Rocket, ShieldCheck, MessageCircle, Globe,
 } from 'lucide-react';
 import type { Lang } from '../shell/types';
-import { certificates, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
+import { certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
 import { shopsiiaDemo } from '../demos/shopsiia';
 import { salasaDemo } from '../demos/salasa';
 import { letsDemo } from '../demos/lets';
 import { MiniPhone } from './MiniPhone';
 import { tech, PlayMark, AppleMark } from './TechIcons';
 import photo from '../assets/photo.jpg';
+import cs50Img from '../assets/certs/cs50.jpg';
+import perfImg from '../assets/certs/performance.jpg';
+import bestImg from '../assets/certs/best-employee.jpg';
+
+const certImg = { cs50: cs50Img, performance: perfImg, 'best-employee': bestImg };
+const issuerTint: Record<string, string> = { Udemy: '#a435f0', Harvard: '#a51c30', ITI: '#c8102e', Udacity: '#02b3e4', Cisco: '#049fd9', Anthropic: '#d97757', SoloLearn: '#1d8a5b', TeraCourses: '#10b04a', 'Cognitive Class': '#3b6fd8', 'Misr Public Library': '#7a5c2e' };
 import './site.css';
 
 const T = (lang: Lang) => (en: string, ar: string) => (lang === 'ar' ? ar : en);
@@ -387,33 +393,64 @@ function Process({ lang }: { lang: Lang }) {
 
 function Credentials({ lang }: { lang: Lang }) {
   const t = T(lang);
-  const [i, setI] = useState(0);
-  const c = certificates[i];
+  const [g, setG] = useState(certGroups[0].id);
+  const group = certGroups.find((x) => x.id === g)!;
+  const total = certGroups.reduce((n, x) => n + x.items.length, 0);
   return (
     <section className="creds" id="credentials">
-      <SecHead title={t('Credentials', 'الشهادات')} sub={t('Courses and certificates behind the hands-on work.', 'كورسات وشهادات ورا الشغل العملي.')} />
-      <div className="cred-tabs" role="tablist">
-        {certificates.map((x, k) => (
-          <button key={x.title} role="tab" aria-selected={k === i} className={k === i ? 'on' : ''} onClick={() => setI(k)}>{x.issuer}</button>
+      <SecHead
+        title={t('Credentials', 'الشهادات')}
+        sub={t(`Recognition at work and ${total} courses and certificates behind the hands-on experience.`, `تكريمات في الشغل و${total} كورس وشهادة ورا الخبرة العملية.`)}
+      />
+
+      <div className="cert-feature">
+        {featuredCerts.map((c) => (
+          <a key={c.image} className="cert-fcard" href={c.url} target="_blank" rel="noopener noreferrer">
+            <span className={`cert-thumb ${c.image === 'cs50' ? 'wide' : ''}`}>
+              <img src={certImg[c.image]} alt={c.title[lang]} loading="lazy" />
+            </span>
+            <span className="cert-fbody">
+              <span className="kicker"><i className="dot" aria-hidden /> {c.issuer}</span>
+              <b>{c.title[lang]}</b>
+              <small>{c.note[lang]}</small>
+              <span className="cert-verify"><ShieldCheck size={14} aria-hidden /> {t('View certificate', 'شوف الشهادة')} <ArrowUpRight size={13} className="flip-rtl" aria-hidden /></span>
+            </span>
+          </a>
         ))}
       </div>
-      <div className="cred-card" key={i}>
-        <div className="cred-main">
-          <p className="kicker"><span className="dot" aria-hidden /> {c.issuer} · {c.area[lang]} <span className="verified"><ShieldCheck size={13} aria-hidden /> {t('Verified', 'موثقة')}</span></p>
-          <h3>{c.title}</h3>
-          <a className="pill-dark" href={c.url} target="_blank" rel="noopener noreferrer">{t('Verify credential', 'تحقق من الشهادة')} <ArrowUpRight size={14} className="flip-rtl" aria-hidden /></a>
-        </div>
-        <div className="cred-side">
-          <p className="kicker">{t('Skills', 'المهارات')}</p>
-          <ul>{c.skills.map((s) => <li key={s}>{s}</li>)}</ul>
-        </div>
+      <p className="cert-exp">
+        <a href={experienceCertUrl} target="_blank" rel="noopener noreferrer">{t('Experience certificate from Tqnia IT', 'شهادة الخبرة من تقنية')} <ArrowUpRight size={13} className="flip-rtl" aria-hidden /></a>
+      </p>
+
+      <div className="cred-tabs" role="tablist" aria-label={t('Certificate groups', 'مجموعات الشهادات')}>
+        {certGroups.map((x) => (
+          <button key={x.id} role="tab" aria-selected={x.id === g} className={x.id === g ? 'on' : ''} onClick={() => setG(x.id)}>
+            {x.name[lang]} <em>{x.items.length}</em>
+          </button>
+        ))}
       </div>
+      <ul className="cert-list" key={g}>
+        {group.items.map((c) => (
+          <li key={c.title}>
+            <a href={c.url} target="_blank" rel="noopener noreferrer">
+              <span className="cert-badge" style={{ background: issuerTint[c.issuer] ?? 'var(--ink)' }} aria-hidden>
+                {(c.issuer || c.title).replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase()}
+              </span>
+              <span className="cert-txt">
+                <b>{c.title}</b>
+                <small>{c.issuer || t('Certificate', 'شهادة')}</small>
+              </span>
+              <span className="cert-go">{t('Verify', 'تحقق')} <ArrowUpRight size={13} className="flip-rtl" aria-hidden /></span>
+            </a>
+          </li>
+        ))}
+      </ul>
 
       <div className="skills-strip">
-        {skills.map((g) => (
-          <div key={g.group.en}>
-            <p className="kicker">{g.group[lang]}</p>
-            <p>{g.items.join(' · ')}</p>
+        {skills.map((sk) => (
+          <div key={sk.group.en}>
+            <p className="kicker">{sk.group[lang]}</p>
+            <p>{sk.items.join(' · ')}</p>
           </div>
         ))}
       </div>
