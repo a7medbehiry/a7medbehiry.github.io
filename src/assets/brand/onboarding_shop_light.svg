@@ -1,0 +1,61 @@
+<svg width="320" height="300" viewBox="0 0 320 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- backdrop -->
+  <circle cx="164" cy="150" r="118" fill="#FFF7DE"/>  <!-- backdrop blob: own token so dark mode can drop it to a neutral lift -->
+  <circle cx="252" cy="66" r="9" fill="#F26522" opacity="0.35"/>
+  <circle cx="60" cy="96" r="6" fill="#F9BE00"/>
+  <circle cx="264" cy="216" r="7" fill="#F9BE00"/>
+  <circle cx="44" cy="212" r="4" fill="#F26522" opacity="0.5"/>
+
+  <!-- phone -->
+  <rect x="104" y="34" width="118" height="232" rx="22" fill="#FFFFFF" stroke="#E8EAED" stroke-width="2"/>
+  <rect x="146" y="43" width="34" height="6" rx="3" fill="#E8EAED"/>
+
+  <!-- search bar -->
+  <rect x="116" y="60" width="94" height="18" rx="9" fill="#F1F2F4"/>
+  <circle cx="127" cy="68" r="4.5" fill="none" stroke="#A8AEB6" stroke-width="2"/>
+  <path d="M130.5 71.5L134 75" stroke="#A8AEB6" stroke-width="2" stroke-linecap="round"/>
+  <rect x="140" y="66" width="44" height="6" rx="3" fill="#D5D9DE"/>
+
+  <!-- hero banner -->
+  <rect x="116" y="86" width="94" height="40" rx="10" fill="#F9BE00"/>
+  <rect x="126" y="97" width="44" height="6" rx="3" fill="#2A2F34"/>
+  <rect x="126" y="109" width="28" height="6" rx="3" fill="#2A2F34" opacity="0.5"/>
+  <circle cx="192" cy="106" r="11" fill="#F26522"/>
+  <path d="M187 106.5L190.5 110L197 103" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- product grid -->
+  <rect x="116" y="134" width="44" height="44" rx="10" fill="#FFEDE4"/>
+  <path d="M128 166L136 154L142 162L146 157L152 166H128Z" fill="#F26522"/>
+  <rect x="166" y="134" width="44" height="44" rx="10" fill="#F1F2F4"/>
+  <circle cx="188" cy="156" r="11" fill="#F9BE00"/>
+  <rect x="116" y="186" width="44" height="44" rx="10" fill="#F1F2F4"/>
+  <rect x="128" y="198" width="20" height="20" rx="6" fill="#F26522" opacity="0.55"/>
+  <rect x="166" y="186" width="44" height="44" rx="10" fill="#FFF6D9"/>
+  <rect x="176" y="199" width="24" height="18" rx="3" fill="#F9BE00"/>
+  <rect x="186" y="199" width="4" height="18" fill="#FFFFFF"/>
+
+  <!-- price placeholders -->
+  <rect x="116" y="240" width="30" height="5" rx="2.5" fill="#E8EAED"/>
+  <rect x="116" y="251" width="18" height="5" rx="2.5" fill="#F9BE00"/>
+  <rect x="166" y="240" width="30" height="5" rx="2.5" fill="#E8EAED"/>
+  <rect x="166" y="251" width="18" height="5" rx="2.5" fill="#F9BE00"/>
+
+  <!-- shopping bag -->
+  <path d="M60 168V162C60 151 68.9 142.2 80 142.2C91.1 142.2 100 151 100 162V168" stroke="#3A4047" stroke-width="4.5" stroke-linecap="round"/>
+  <rect x="44" y="166" width="72" height="72" rx="14" fill="#F26522"/>
+  <path d="M62 196C66.5 201.5 73 204.5 80 204.5C87 204.5 93.5 201.5 98 196" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="66" cy="184" r="4" fill="#FFFFFF"/>
+  <circle cx="94" cy="184" r="4" fill="#FFFFFF"/>
+
+  <!-- discount tag -->
+  <g transform="rotate(-16 250 130)">
+    <path d="M226 106H262C266.4 106 270 109.6 270 114V150C270 154.4 266.4 158 262 158H226C221.6 158 218 154.4 218 150V114C218 109.6 221.6 106 226 106Z" fill="#F9BE00"/>
+    <circle cx="230" cy="118" r="4.5" fill="#2A2F34"/>
+    <path d="M232 146L258 118" stroke="#2A2F34" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="258" cy="146" r="4.5" fill="#2A2F34"/>
+  </g>
+
+  <!-- sparkles -->
+  <path d="M244 178L246.4 184.6L253 187L246.4 189.4L244 196L241.6 189.4L235 187L241.6 184.6L244 178Z" fill="#F26522" opacity="0.6"/>
+  <path d="M76 118L77.6 122.4L82 124L77.6 125.6L76 130L74.4 125.6L70 124L74.4 122.4L76 118Z" fill="#F9BE00"/>
+</svg>
