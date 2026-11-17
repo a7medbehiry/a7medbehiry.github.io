@@ -1,6 +1,6 @@
 import type { DemoDef } from '../../shell/types';
 import { SalasaApp } from './SalasaApp';
-import icon from '../../assets/icons/salasa.png';
+import icon from '../../assets/icons/salasa.webp';
 
 export const salasaDemo: DemoDef = {
   id: 'salasa',

@@ -1,6 +1,6 @@
 import type { DemoDef } from '../../shell/types';
 import { LetsApp } from './LetsApp';
-import icon from '../../assets/icons/magchat.png';
+import icon from '../../assets/icons/magchat.webp';
 
 export const letsDemo: DemoDef = {
   id: 'lets',

@@ -118,6 +118,7 @@ export function DemoShell({ demo, siteLang, onExit }: { demo: DemoDef; siteLang:
   };
 
   const App = demo.App;
+  const statusDark = demo.statusDarkWhen ? demo.statusDarkWhen(flags) : demo.statusDark;
   const dir = lang === 'ar' ? 'rtl' : 'ltr';
 
   return (
@@ -141,7 +142,7 @@ export function DemoShell({ demo, siteLang, onExit }: { demo: DemoDef; siteLang:
                 <App key={appKey} api={api} />
               </div>
 
-              <div className={`status ${locked ? 'status-light' : demo.statusDark ? 'status-dark' : 'status-light'}`} dir="ltr">
+              <div className={`status ${locked ? 'status-light' : statusDark ? 'status-dark' : 'status-light'}`} dir="ltr">
                 <span className="status-time">{clock(now, 'en')}</span>
                 <span className="island" />
                 <span className="status-icons" aria-hidden>
@@ -183,7 +184,7 @@ export function DemoShell({ demo, siteLang, onExit }: { demo: DemoDef; siteLang:
               )}
 
               {toastText && <div className="toast" role="status">{toastText}</div>}
-              <div className={`home-ind ${demo.statusDark || locked ? '' : 'home-ind-light'}`} />
+              <div className={`home-ind ${statusDark || locked ? '' : 'home-ind-light'}`} />
             </div>
           </div>
         </div>

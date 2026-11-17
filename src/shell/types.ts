@@ -52,6 +52,8 @@ export interface DemoDef {
   accent: string;
   /** Status bar text colour on the app's first screen. */
   statusDark: boolean;
+  /** Overrides statusDark when the app has its own theme toggle. */
+  statusDarkWhen?: (flags: Record<string, boolean>) => boolean;
   fontFamily: Record<Lang, string>;
   initialRoute: Route;
   notifications: DemoNotification[];

@@ -1,742 +1,1003 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode, type UIEvent } from 'react';
 import {
-  Bell, Search, MapPin, ChevronRight, ChevronLeft, Home, LayoutGrid, ShoppingCart, Package, User, Star, Truck, Minus, Plus,
-  Trash2, Banknote, Check, ShieldCheck, RotateCcw, Heart, X, Store, Globe, Moon, HelpCircle, LogIn, CircleDot,
+  Bell, LayoutGrid, Search, MapPin, ChevronDown, ChevronRight, ChevronLeft, Plus, Minus, Star, Share2, ShoppingCart, Trash2, Check,
+  Truck, RotateCcw, ShieldCheck, Banknote, MessageCircle, Phone, Mail, Package, Store, Moon, Sun, Languages, BellRing, Copy, Link2,
+  Send, CircleCheck, X, Ticket, Clock,
 } from 'lucide-react';
 import type { AppApi } from '../../shell/types';
-import { banners, categories, egp, productById, products, type Product } from './data';
-import wordmark from '../../assets/brand/brand_name_light.svg';
-import shopArt from '../../assets/brand/onboarding_deliver_light.svg';
+import { categories, discount, faqs, money, productById, products, sections, seedCart, type Product } from './data';
+import { ProductArt } from './Art';
+import { GlassNav, useNavCollapse, type Tab } from './Nav';
+import logoLight from '../../assets/brand/brand_name_light.svg';
+import logoDark from '../../assets/brand/brand_name_dark.svg';
 import './shopsiia.css';
 
-interface Line {
-  key: string;
-  pid: string;
-  color?: string;
-  size?: string;
-  qty: number;
-}
-type Step = 0 | 1 | 2 | 3 | 4 | 5;
-interface Order {
-  id: string;
-  date: Date;
-  lines: Line[];
-  total: number;
-  step: Step;
-  cancelled?: boolean;
-}
+type L = { en: string; ar: string };
+interface Line { key: string; pid: string; qty: number; variant?: L; on: boolean }
+interface Msg { id: number; from: 'me' | 'agent'; text: string }
+interface Order { id: string; step: number; total: number; units: number }
 
-const TABS = ['home', 'categories', 'cart', 'orders', 'account'];
+const TABS: Tab[] = ['home', 'support', 'offers', 'cart', 'account'];
 
-const seedOrders = (): Order[] => [
-  { id: 'SH-10482', date: new Date(Date.now() - 2 * 864e5), lines: [{ key: 'a', pid: 'p2', qty: 1 }], total: 3850, step: 3 },
-  { id: 'SH-10311', date: new Date(Date.now() - 12 * 864e5), lines: [{ key: 'b', pid: 'p4', qty: 2 }, { key: 'c', pid: 'p7', qty: 1 }], total: 1347, step: 5 },
-];
+const seedLines = (): Line[] => seedCart.map((l, i) => ({ key: `seed${i}`, pid: l.pid, qty: l.qty, variant: l.variant, on: true }));
 
 export function ShopsiiaApp({ api }: { api: AppApi }) {
   const { nav, t, lang } = api;
-  const [cart, setCart] = useState<Line[]>([{ key: 'p5--', pid: 'p5', qty: 1 }]);
-  const [orders, setOrders] = useState<Order[]>(seedOrders);
-  const [wish, setWish] = useState<Set<string>>(new Set(['p6']));
+  const dark = !!api.flags.dark;
+  const mini = !!api.flags.mini;
   const r = nav.route;
-  const isTab = TABS.includes(r.name);
-  const count = cart.reduce((s, l) => s + l.qty, 0);
+  const isTab = TABS.includes(r.name as Tab);
+  const tab: Tab = isTab ? (r.name as Tab) : 'home';
 
-  const add = (pid: string, qty = 1, color?: string, size?: string) => {
-    const key = `${pid}-${color ?? ''}-${size ?? ''}`;
-    setCart((c) => {
-      const hit = c.find((l) => l.key === key);
-      return hit ? c.map((l) => (l.key === key ? { ...l, qty: l.qty + qty } : l)) : [...c, { key, pid, qty, color, size }];
+  const [lines, setLines] = useState<Line[]>(seedLines);
+  const [unread, setUnread] = useState(1);
+  const [orders, setOrders] = useState<Order[]>([{ id: 'SH-24817', step: 2, total: 1590, units: 1 }]);
+  const [msgs, setMsgs] = useState<Msg[]>(() => [
+    { id: 1, from: 'me', text: lang === 'ar' ? 'أهلًا، طلبي SH-24817 هيوصل إمتى؟' : 'Hi, when will order SH-24817 arrive?' },
+    { id: 2, from: 'agent', text: lang === 'ar' ? 'أهلًا بيك! طلبك اتشحن وهيوصلك بكرة قبل 6 م. تقدر تتابعه من صفحة الطلب.' : 'Hi there! Your order has shipped and arrives tomorrow before 6 PM. You can follow it from the order page.' },
+  ]);
+  const collapse = useNavCollapse();
+
+  // Every new screen starts with the bar open.
+  const routeKey = `${r.name}:${JSON.stringify(r.params ?? {})}`;
+  useEffect(() => {
+    collapse.reset();
+  }, [routeKey]);
+
+  // Pushes from the control panel move the order along.
+  useEffect(() => {
+    if (r.name === 'tracking' && r.params?.advance) {
+      const step = Number(r.params.advance);
+      setOrders((o) => o.map((x) => (x.id === r.params!.id ? { ...x, step: Math.max(x.step, step) } : x)));
+    }
+    if (r.name === 'chat') setUnread(0);
+  }, [routeKey]);
+
+  const units = lines.reduce((s, l) => s + l.qty, 0);
+  const sel = lines.filter((l) => l.on);
+  const selUnits = sel.reduce((s, l) => s + l.qty, 0);
+  const subtotal = sel.reduce((s, l) => s + productById(l.pid).price * l.qty, 0);
+  const saved = sel.reduce((s, l) => {
+    const p = productById(l.pid);
+    return s + ((p.compare ?? p.price) - p.price) * l.qty;
+  }, 0);
+
+  const add = (pid: string, qty = 1, variant?: L) => {
+    const key = `${pid}|${variant?.en ?? ''}`;
+    setLines((c) => {
+      const hit = c.find((l) => l.key === key || (l.pid === pid && !variant));
+      return hit ? c.map((l) => (l === hit ? { ...l, qty: l.qty + qty, on: true } : l)) : [...c, { key, pid, qty, variant, on: true }];
     });
-    api.toast(t('Added to cart', 'اتضاف للسلة'));
+    api.toast(t('Added to your cart', 'تمت الإضافة إلى سلتك'));
   };
 
   const placeOrder = () => {
-    const id = `SH-${10500 + orders.length * 7}`;
-    const total = cart.reduce((s, l) => s + productById(l.pid).price * l.qty, 0) + (subtotal(cart) >= 1000 ? 0 : 45);
-    setOrders((o) => [{ id, date: new Date(), lines: cart, total, step: 0 }, ...o]);
-    setCart([]);
+    const id = `SH-${24830 + orders.length * 13}`;
+    setOrders((o) => [{ id, step: 0, total: subtotal, units: selUnits }, ...o]);
+    setLines((c) => c.filter((l) => !l.on));
     nav.reset('placed', { id });
     api.notify(
       {
         id: 'confirmed',
-        title: { en: 'Order confirmed', ar: 'تم تأكيد الأوردر' },
-        body: { en: `The seller accepted order ${id}. We'll tell you when it ships.`, ar: `البائع قبل الأوردر ${id}. هنبلغك أول ما يتشحن.` },
+        title: { en: 'Order confirmed', ar: 'تم تأكيد الطلب' },
+        body: { en: `${id} is confirmed and split between its vendors. We'll tell you when it ships.`, ar: `تم تأكيد ${id} وتقسيمه بين البائعين. هنبلغك أول ما يتشحن.` },
         target: { name: 'tracking', params: { id } },
       },
-      4500,
+      3500,
     );
-    window.setTimeout(() => setOrders((o) => o.map((x) => (x.id === id ? { ...x, step: 1 } : x))), 4500);
+    window.setTimeout(() => setOrders((o) => o.map((x) => (x.id === id ? { ...x, step: Math.max(x.step, 1) } : x))), 3500);
   };
 
-  // Advance orders when a matching push arrives from the control panel.
-  useEffect(() => {
-    if (r.name === 'tracking' && r.params?.advance) {
-      const step = Number(r.params.advance) as Step;
-      setOrders((o) => o.map((x) => (x.id === r.params!.id ? { ...x, step: Math.max(x.step, step) as Step } : x)));
-    }
-  }, [r]);
+  const sendChat = (text: string) => {
+    if (!text.trim()) return;
+    const id = Date.now();
+    setMsgs((m) => [...m, { id, from: 'me', text }]);
+    const lower = text.toLowerCase();
+    const reply = /return|رجّع|ارجاع|مرتجع|ترجيع/.test(lower)
+      ? t('Sure. Open the order, tap "Return an item" and pick a time. A courier collects it, no charge.', 'أكيد. افتح الطلب، ودوس "إرجاع منتج" واختار معاد. المندوب هييجي ياخده ببلاش.')
+      : /order|طلب|اوردر|أوردر|فين/.test(lower)
+        ? t('Your latest order is on its way. I just sent you the tracking link in a notification.', 'آخر طلب ليك في الطريق. بعتلك لينك التتبع في إشعار دلوقتي.')
+        : t('Thanks! A member of the team will get back to you in a minute.', 'شكرًا! حد من الفريق هيرد عليك خلال دقيقة.');
+    window.setTimeout(() => setMsgs((m) => [...m, { id: id + 1, from: 'agent', text: '…typing' }]), 400);
+    window.setTimeout(() => setMsgs((m) => [...m.filter((x) => x.id !== id + 1), { id: id + 2, from: 'agent', text: reply }]), 1700);
+  };
 
-  let screen: JSX.Element;
+  const ctx: Ctx = { api, t, lang, dark, mini, add, lines, setLines, units, collapse };
+
+  let screen: ReactNode;
   switch (r.name) {
-    case 'categories':
-      screen = <Categories api={api} />;
-      break;
-    case 'category':
-      screen = <CategoryProducts api={api} id={String(r.params?.id)} wish={wish} />;
-      break;
-    case 'cart':
-      screen = <Cart api={api} cart={cart} setCart={setCart} />;
-      break;
-    case 'checkout':
-      screen = <Checkout api={api} cart={cart} onPlace={placeOrder} />;
-      break;
-    case 'placed':
-      screen = <Placed api={api} id={String(r.params?.id)} />;
-      break;
-    case 'orders':
-      screen = <Orders api={api} orders={orders} />;
-      break;
-    case 'tracking':
-      screen = <Tracking api={api} order={orders.find((o) => o.id === r.params?.id) ?? orders[0]} onCancel={(id) => setOrders((o) => o.map((x) => (x.id === id ? { ...x, cancelled: true } : x)))} />;
-      break;
     case 'product':
-      screen = <ProductScreen api={api} p={productById(String(r.params?.id))} onAdd={add} wished={wish.has(String(r.params?.id))} toggleWish={(id) => setWish((w) => { const n = new Set(w); n.has(id) ? n.delete(id) : n.add(id); return n; })} cartCount={count} />;
+      screen = <ProductScreen ctx={ctx} p={productById(String(r.params?.id ?? 'p1'))} />;
       break;
     case 'search':
-      screen = <SearchScreen api={api} />;
+      screen = <SearchScreen ctx={ctx} />;
+      break;
+    case 'checkout':
+      screen = <CheckoutScreen ctx={ctx} subtotal={subtotal} saved={saved} onPlace={placeOrder} />;
+      break;
+    case 'placed':
+      screen = <PlacedScreen ctx={ctx} id={String(r.params?.id ?? '')} />;
+      break;
+    case 'tracking':
+      screen = <TrackingScreen ctx={ctx} order={orders.find((o) => o.id === r.params?.id) ?? orders[0]} />;
+      break;
+    case 'faqs':
+      screen = <FaqsScreen ctx={ctx} />;
+      break;
+    case 'chat':
+      screen = <ChatScreen ctx={ctx} msgs={msgs} onSend={sendChat} />;
+      break;
+    case 'support':
+      screen = <SupportScreen ctx={ctx} unread={unread} />;
+      break;
+    case 'offers':
+      screen = <OffersScreen ctx={ctx} />;
+      break;
+    case 'cart':
+      screen = <CartScreen ctx={ctx} />;
       break;
     case 'account':
-      screen = <Account api={api} />;
-      break;
-    case 'notifications':
-      screen = <Inbox api={api} />;
+      screen = <AccountScreen ctx={ctx} orders={orders} />;
       break;
     default:
-      screen = <HomeScreen api={api} wish={wish} />;
+      screen = <HomeScreen ctx={ctx} />;
   }
 
+  const accessory =
+    isTab && tab === 'cart' && lines.length > 0
+      ? {
+          saved: saved > 0 ? t(`You saved ${money(saved, 'en')}`, `وفّرت ${money(saved, 'ar')}`) : null,
+          label: t(`Checkout (${selUnits}) · ${money(subtotal, 'en')}`, `إتمام الشراء (${selUnits}) · ${money(subtotal, 'ar')}`),
+          onCheckout: () => (selUnits > 0 ? nav.push('checkout') : api.toast(t('Select at least one item', 'اختار منتج واحد على الأقل'))),
+        }
+      : null;
+
   return (
-    <div className="sp">
-      <div className={`sp-body ${isTab ? 'with-nav' : ''}`}>{screen}</div>
+    <div className={`sx ${dark ? 'dark' : ''} ${mini ? 'sx-mini' : ''}`}>
+      <div key={routeKey} className={`sx-screen ${isTab ? 'tab-in' : 'push-in'}`}>
+        {screen}
+      </div>
+      {isTab && tab !== 'home' && <div className="sx-sb" aria-hidden />}
       {isTab && (
-        <nav className="sp-nav">
-          {[
-            ['home', Home, t('Home', 'الرئيسية')],
-            ['categories', LayoutGrid, t('Categories', 'الأقسام')],
-            ['cart', ShoppingCart, t('Cart', 'السلة')],
-            ['orders', Package, t('Orders', 'طلباتي')],
-            ['account', User, t('Account', 'حسابي')],
-          ].map(([name, Icon, label]) => {
-            const I = Icon as typeof Home;
-            const active = r.name === name;
-            return (
-              <button key={name as string} className={active ? 'on' : ''} onClick={() => nav.reset(name as string)}>
-                <span className="sp-nav-ic">
-                  <I size={22} strokeWidth={active ? 2.4 : 1.8} />
-                  {name === 'cart' && count > 0 && <em>{count}</em>}
-                </span>
-                <span>{label as string}</span>
-              </button>
-            );
-          })}
-        </nav>
+        <GlassNav
+          tab={tab}
+          lang={lang}
+          collapsed={collapse.collapsed}
+          badges={{ cart: units, support: unread }}
+          accessory={accessory}
+          onTab={(x) => (x === tab ? collapse.expand() : nav.reset(x))}
+          onExpand={collapse.expand}
+        />
       )}
     </div>
   );
 }
 
-const subtotal = (lines: Line[]) => lines.reduce((s, l) => s + productById(l.pid).price * l.qty, 0);
+interface Ctx {
+  api: AppApi;
+  t: (en: string, ar: string) => string;
+  lang: 'en' | 'ar';
+  dark: boolean;
+  mini: boolean;
+  add: (pid: string, qty?: number, variant?: L) => void;
+  lines: Line[];
+  setLines: React.Dispatch<React.SetStateAction<Line[]>>;
+  units: number;
+  collapse: ReturnType<typeof useNavCollapse>;
+}
 
-function Back({ api, title, children }: { api: AppApi; title: string; children?: React.ReactNode }) {
-  const Chevron = api.lang === 'ar' ? ChevronRight : ChevronLeft;
+/* ---------------------------------------------------------------- shared */
+
+const Chev = ({ size = 16 }: { size?: number }) => <ChevronRight size={size} className="flip-rtl" aria-hidden />;
+
+function Price({ p, large, lang }: { p: Product; large?: boolean; lang: 'en' | 'ar' }) {
+  const d = discount(p);
   return (
-    <header className="sp-bar">
-      <button className="sp-icon-btn" onClick={() => (api.nav.canPop ? api.nav.pop() : api.nav.reset('home'))} aria-label={api.t('Back', 'رجوع')}>
-        <Chevron size={22} />
+    <span className={`sx-price ${large ? 'lg' : ''}`}>
+      <b dir="ltr">{money(p.price, lang)}</b>
+      {d > 0 && <s dir="ltr">{money(p.compare!, lang)}</s>}
+      {large && d > 0 && <span className="sx-off lg" dir="ltr">-{d}%</span>}
+    </span>
+  );
+}
+
+function Tile({ p, angle, className = '' }: { p: Product; angle?: number; className?: string }) {
+  return (
+    <span className={`sx-tile ${className}`} style={{ ['--tile' as string]: p.tint }}>
+      <ProductArt kind={p.kind} color={p.color} angle={angle} />
+    </span>
+  );
+}
+
+function ProductCard({ ctx, p, wide }: { ctx: Ctx; p: Product; wide?: boolean }) {
+  const { t, lang, api } = ctx;
+  const d = discount(p);
+  return (
+    <div className={`sx-card ${wide ? 'wide' : ''}`} role="button" tabIndex={0} onClick={() => api.nav.push('product', { id: p.id })}>
+      <span className="sx-card-img">
+        <Tile p={p} />
+        {p.stock <= 3 && <span className="sx-flag">{t(`Only ${p.stock} left`, `باقي ${p.stock} بس`)}</span>}
+        {d > 0 && <span className="sx-off" dir="ltr">-{d}%</span>}
+      </span>
+      <span className="sx-card-body">
+        <span className="sx-card-meta">
+          <span className="sx-card-vendor">{p.vendor[lang]}</span>
+          <span className="sx-stars"><Star size={10} fill="#F9BE00" stroke="none" aria-hidden /> {p.rating.toFixed(1)}</span>
+        </span>
+        <span className="sx-card-title">{p.title[lang]}</span>
+        <Price p={p} lang={lang} />
+        <span className="sx-card-foot">
+          <span className="sx-ok">{p.freeShipping ? t('Free shipping', 'شحن مجاني') : t('In stock', 'متوفر')}</span>
+          <button
+            className="sx-add"
+            aria-label={t('Add to cart', 'أضف إلى السلة')}
+            onClick={(e) => {
+              e.stopPropagation();
+              ctx.add(p.id, 1, p.colors?.[0]?.name);
+            }}
+          >
+            <Plus size={16} strokeWidth={2.6} aria-hidden />
+          </button>
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function SectionHead({ title, sub, onAll, t }: { title: string; sub?: string; onAll?: () => void; t: Ctx['t'] }) {
+  return (
+    <div className="sx-sec">
+      <div>
+        <h3>{title}</h3>
+        {sub && <p>{sub}</p>}
+      </div>
+      {onAll && (
+        <button className="sx-all" onClick={onAll}>
+          {t('View all', 'عرض الكل')} <Chev size={15} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function TopBar({ ctx, title, right, transparent }: { ctx: Ctx; title?: string; right?: ReactNode; transparent?: boolean }) {
+  return (
+    <header className={`sx-top ${transparent ? 'clear' : ''}`}>
+      <button className="sx-round" onClick={ctx.api.nav.pop} aria-label={ctx.t('Back', 'رجوع')}>
+        <ChevronLeft size={22} className="flip-rtl" aria-hidden />
       </button>
-      <h1>{title}</h1>
-      <div className="sp-bar-end">{children}</div>
+      {title && <h2>{title}</h2>}
+      <span className="sx-top-right">{right}</span>
     </header>
   );
 }
 
-function badgeLabel(b: Product['badge'], t: AppApi['t']) {
-  switch (b) {
-    case 'deal': return t('Deal', 'عرض');
-    case 'best': return t('Best seller', 'الأكثر مبيعًا');
-    case 'new': return t('New', 'جديد');
-    case 'official': return t('Official store', 'متجر رسمي');
-    case 'low': return t('Only 2 left', 'باقي 2 بس');
-    default: return null;
-  }
+function Logo({ dark }: { dark: boolean }) {
+  return <img className="sx-logo" src={dark ? logoDark : logoLight} alt="Shopsiia" />;
 }
 
-function Thumb({ p, size = 56 }: { p: Product; size?: number }) {
-  const I = p.icon;
-  return (
-    <div className="sp-thumb" style={{ background: p.tint }}>
-      <I size={size} strokeWidth={1.4} color="#2A2F34" />
-    </div>
-  );
-}
+/* ------------------------------------------------------------------ home */
 
-function ProductCard({ api, p, wished }: { api: AppApi; p: Product; wished?: boolean }) {
-  const { t, lang } = api;
-  const off = p.old ? Math.round((1 - p.price / p.old) * 100) : 0;
-  return (
-    <button className="sp-card" onClick={() => api.nav.push('product', { id: p.id })}>
-      <div className="sp-card-img">
-        <Thumb p={p} />
-        {p.badge && <span className={`sp-badge ${p.badge === 'low' ? 'hot' : ''}`}>{badgeLabel(p.badge, t)}</span>}
-        {wished && <Heart className="sp-wish" size={16} fill="#F26522" color="#F26522" />}
-      </div>
-      <div className="sp-card-body">
-        <span className="sp-vendor">{lang === 'ar' ? p.vendorAr : p.vendorEn}</span>
-        <span className="sp-title">{lang === 'ar' ? p.ar : p.en}</span>
-        <span className="sp-rating"><Star size={11} fill="#F9BE00" color="#F9BE00" /> {p.rating} <i>({p.reviews})</i></span>
-        <span className="sp-price">
-          {egp(p.price, lang)}
-          {off > 0 && <s>{egp(p.old!, lang)}</s>}
-        </span>
-        {off > 0 && <span className="sp-off">-{off}%</span>}
-      </div>
-    </button>
-  );
-}
+function HomeScreen({ ctx }: { ctx: Ctx }) {
+  const { t, lang, api, dark, collapse } = ctx;
+  const head = useRef<HTMLDivElement>(null);
+  const frame = useRef(0);
 
-function HomeScreen({ api, wish }: { api: AppApi; wish: Set<string> }) {
-  const { t, lang, nav } = api;
-  const [slide, setSlide] = useState(0);
-  useEffect(() => {
-    const id = window.setInterval(() => setSlide((s) => (s + 1) % banners.length), 3500);
-    return () => window.clearInterval(id);
-  }, []);
-  const deals = products.filter((p) => p.old);
-  const best = products.filter((p) => !p.old || p.badge === 'best');
+  // The address row and search fold away as the page scrolls, as the app's
+  // HomeHeaderSliver does. Drawn with a CSS variable: no re-render per frame.
+  const onScroll = (e: UIEvent<HTMLDivElement>) => {
+    collapse.bind.onScroll(e);
+    const y = e.currentTarget.scrollTop;
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => head.current?.style.setProperty('--p', String(Math.min(1, Math.max(0, y / 56)))));
+  };
+
+  const picked = useMemo(() => [...products].sort((a, b) => b.reviews - a.reviews), []);
+
   return (
-    <div className="sp-scroll">
-      <div className="sp-hero">
-        <div className="sp-hero-row">
-          <img src={wordmark} alt="Shopsiia" className="sp-wordmark" />
-          <div className="sp-hero-actions">
-            <button className="sp-circle" onClick={() => nav.push('notifications')} aria-label={t('Notifications', 'الإشعارات')}>
-              <Bell size={19} />
-              <i className="sp-dot" />
+    <div className="sx-home">
+      <div className="sx-hd" ref={head}>
+        <div className="sx-hd-top">
+          <Logo dark={dark} />
+          <span className="sx-hd-icons">
+            <button className="sx-icon fold-in" onClick={() => api.nav.push('search')} aria-label={t('Search', 'البحث')}><Search size={20} aria-hidden /></button>
+            <button className="sx-icon" onClick={() => api.toast(t('No new notifications', 'مفيش إشعارات جديدة'))} aria-label={t('Notifications', 'الإشعارات')}>
+              <Bell size={20} aria-hidden />
+              <i className="sx-dot" />
             </button>
-          </div>
+            <button className="sx-icon" onClick={() => api.nav.push('offers')} aria-label={t('Categories', 'الفئات')}><LayoutGrid size={20} aria-hidden /></button>
+          </span>
         </div>
-        <button className="sp-search" onClick={() => nav.push('search')}>
-          <Search size={18} />
-          <span>{t('Search products, brands and stores', 'دوّر على منتجات وبراندات ومتاجر')}</span>
-        </button>
-        <div className="sp-deliver">
-          <MapPin size={15} />
-          <span>{t('Deliver to', 'التوصيل إلى')} <b>{t('Smouha, Alexandria', 'سموحة، الإسكندرية')}</b></span>
+        <div className="sx-hd-fold">
+          <button className="sx-deliver" onClick={() => api.toast(t('Pick a pin on the map to change it', 'حدد مكانك على الخريطة عشان تغيّره'))}>
+            <MapPin size={20} fill="currentColor" stroke="var(--bg)" aria-hidden />
+            <span>
+              <small>{t('Deliver to', 'التوصيل إلى')}</small>
+              <b>{t('Smouha, Alex', 'سموحة، إسكندرية')} <ChevronDown size={14} aria-hidden /></b>
+            </span>
+          </button>
+          <button className="sx-search" onClick={() => api.nav.push('search')}>
+            <Search size={20} aria-hidden />
+            <span>{t('Search products', 'ابحث عن منتجات')}</span>
+          </button>
         </div>
       </div>
 
-      <div className="sp-chips">
-        {categories.map((c) => (
-          <button key={c.id} onClick={() => nav.push('category', { id: c.id })}>{lang === 'ar' ? c.ar : c.en}</button>
-        ))}
-      </div>
-
-      <div className="sp-banner-track">
-        <div className="sp-banners" style={{ transform: `translateX(${(lang === 'ar' ? 1 : -1) * slide * 100}%)` }}>
-          {banners.map((b) => (
-            <button key={b.id} className="sp-bannerx" style={{ background: b.bg, color: b.fg }} onClick={() => nav.push('category', { id: b.cat })}>
-              <span className="sp-banner-kicker">{lang === 'ar' ? b.ar[0] : b.en[0]}</span>
-              <span className="sp-banner-text">{lang === 'ar' ? b.ar[1] : b.en[1]}</span>
-              <span className="sp-banner-cta">{t('Shop now', 'تسوق دلوقتي')}</span>
+      <div className="sx-scroll home" {...collapse.bind} onScroll={onScroll}>
+        <div className="sx-perk"><Truck size={16} aria-hidden /> {t('Free shipping on all orders', 'شحن مجاني على كل الطلبات')}</div>
+        <Banners ctx={ctx} />
+        <SectionHead title={t('Shop by category', 'تسوّق حسب الفئة')} onAll={() => api.nav.reset('offers')} t={t} />
+        <div className="sx-rail cats">
+          {categories.map((c) => (
+            <button key={c.id} className="sx-cat" onClick={() => api.nav.push('search', { q: c.id })}>
+              <span className="sx-cat-img" style={{ ['--tile' as string]: c.tint }}>
+                <ProductArt kind={c.art} color={c.art === 'lamp' ? '#F9BE00' : c.art === 'tshirt' ? '#F9BE00' : c.art === 'sneaker' ? '#F26522' : c.art === 'perfume' ? '#C98A3B' : c.art === 'backpack' ? '#2F6B55' : c.art === 'mug' ? '#F26522' : '#2A2F34'} />
+              </span>
+              <span>{c[lang]}</span>
             </button>
           ))}
         </div>
-        <div className="sp-dots">{banners.map((b, i) => <i key={b.id} className={i === slide ? 'on' : ''} />)}</div>
-      </div>
-
-      <div className="sp-perk"><Truck size={16} /> {t('Free shipping on orders over EGP 1,000', 'شحن مجاني للطلبات فوق 1,000 ج.م')}</div>
-
-      <Section title={t('Shop by category', 'تسوق حسب القسم')} onAll={() => nav.reset('categories')} api={api} />
-      <div className="sp-rail sp-cats">
-        {categories.map((c) => {
-          const I = c.icon;
-          return (
-            <button key={c.id} onClick={() => nav.push('category', { id: c.id })}>
-              <span style={{ background: c.tint }}><I size={26} strokeWidth={1.6} /></span>
-              {lang === 'ar' ? c.ar : c.en}
-            </button>
-          );
-        })}
-      </div>
-
-      <Section title={t('Deals of the day', 'عروض النهارده')} api={api} onAll={() => nav.push('category', { id: 'electronics' })} />
-      <div className="sp-rail">{deals.map((p) => <ProductCard key={p.id} api={api} p={p} wished={wish.has(p.id)} />)}</div>
-
-      <Section title={t('Best sellers', 'الأكثر مبيعًا')} api={api} onAll={() => nav.push('category', { id: 'fashion' })} />
-      <div className="sp-rail">{best.map((p) => <ProductCard key={p.id} api={api} p={p} wished={wish.has(p.id)} />)}</div>
-      <div style={{ height: 16 }} />
-    </div>
-  );
-}
-
-function Section({ title, onAll, api }: { title: string; onAll?: () => void; api: AppApi }) {
-  return (
-    <div className="sp-section">
-      <h2>{title}</h2>
-      {onAll && <button onClick={onAll}>{api.t('See all', 'الكل')}</button>}
-    </div>
-  );
-}
-
-function Categories({ api }: { api: AppApi }) {
-  const { t, lang, nav } = api;
-  return (
-    <>
-      <header className="sp-bar"><h1 className="solo">{t('Categories', 'الأقسام')}</h1></header>
-      <div className="sp-scroll pad">
-        <div className="sp-catgrid">
-          {categories.map((c) => {
-            const I = c.icon;
-            const n = products.filter((p) => p.category === c.id).length;
-            return (
-              <button key={c.id} onClick={() => nav.push('category', { id: c.id })} style={{ background: c.tint }}>
-                <I size={34} strokeWidth={1.5} />
-                <b>{lang === 'ar' ? c.ar : c.en}</b>
-                <small>{n ? t(`${n} products`, `${n} منتجات`) : t('Coming soon', 'قريبًا')}</small>
-              </button>
-            );
-          })}
+        {sections.map((s) => (
+          <section key={s.id}>
+            <SectionHead title={s.title[lang]} sub={s.sub[lang]} onAll={() => api.nav.reset('offers')} t={t} />
+            <div className="sx-rail">
+              {s.ids.map((id) => <ProductCard key={id} ctx={ctx} p={productById(id)} />)}
+            </div>
+          </section>
+        ))}
+        <SectionHead title={t('Picked for you', 'مختارات ليك')} t={t} />
+        <div className="sx-grid">
+          {picked.map((p) => <ProductCard key={p.id} ctx={ctx} p={p} wide />)}
         </div>
+        <div className="sx-end" />
       </div>
-    </>
+    </div>
   );
 }
 
-function CategoryProducts({ api, id, wish }: { api: AppApi; id: string; wish: Set<string> }) {
-  const c = categories.find((x) => x.id === id) ?? categories[0];
-  const list = products.filter((p) => p.category === c.id);
-  const shown = list.length ? list : products.slice(0, 4);
-  const [sort, setSort] = useState<'featured' | 'low' | 'high'>('featured');
-  const sorted = useMemo(() => [...shown].sort((a, b) => (sort === 'low' ? a.price - b.price : sort === 'high' ? b.price - a.price : 0)), [shown, sort]);
+const BANNERS = [
+  { id: 'b1', cls: 'b-sale', kind: 'headphones' as const, color: '#2A2F34', title: { en: 'Mega sale', ar: 'أوكازيون' }, sub: { en: 'Up to 50% off electronics', ar: 'خصم لحد 50% على الإلكترونيات' }, to: 'p6' },
+  { id: 'b2', cls: 'b-ink', kind: 'backpack' as const, color: '#F9BE00', title: { en: 'Free shipping', ar: 'شحن مجاني' }, sub: { en: 'On every order this week', ar: 'على كل الطلبات الأسبوع ده' }, to: 'p7' },
+  { id: 'b3', cls: 'b-orange', kind: 'sneaker' as const, color: '#FFFFFF', title: { en: 'New season', ar: 'موسم جديد' }, sub: { en: 'Fresh styles from 120+ vendors', ar: 'ستايلات جديدة من 120+ بائع' }, to: 'p5' },
+];
+
+function Banners({ ctx }: { ctx: Ctx }) {
+  const { lang, api, mini } = ctx;
+  const [i, setI] = useState(0);
+  const strip = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (mini) return;
+    const id = window.setInterval(() => {
+      const el = strip.current;
+      if (!el) return;
+      const next = (Math.round(Math.abs(el.scrollLeft) / el.clientWidth) + 1) % BANNERS.length;
+      el.scrollTo({ left: (lang === 'ar' ? -1 : 1) * next * el.clientWidth, behavior: 'smooth' });
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [mini, lang]);
+
   return (
-    <>
-      <Back api={api} title={api.lang === 'ar' ? c.ar : c.en} />
-      <div className="sp-sortbar">
-        {(['featured', 'low', 'high'] as const).map((s) => (
-          <button key={s} className={sort === s ? 'on' : ''} onClick={() => setSort(s)}>
-            {s === 'featured' ? api.t('Featured', 'المميز') : s === 'low' ? api.t('Price: low to high', 'السعر: من الأقل') : api.t('Price: high to low', 'السعر: من الأعلى')}
+    <div className="sx-banners">
+      <div
+        className="sx-banner-strip"
+        ref={strip}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          setI(Math.round(Math.abs(el.scrollLeft) / el.clientWidth));
+        }}
+      >
+        {BANNERS.map((b) => (
+          <button key={b.id} className={`sx-banner ${b.cls}`} onClick={() => api.nav.push('product', { id: b.to })}>
+            <span className="sx-banner-text">
+              <b>{b.title[lang]}</b>
+              <span>{b.sub[lang]}</span>
+            </span>
+            <span className="sx-banner-art"><ProductArt kind={b.kind} color={b.color} angle={-8} /></span>
           </button>
         ))}
       </div>
-      <div className="sp-scroll pad">
-        <div className="sp-grid">{sorted.map((p) => <ProductCard key={p.id} api={api} p={p} wished={wish.has(p.id)} />)}</div>
-      </div>
-    </>
+      <div className="sx-dots" aria-hidden>{BANNERS.map((b, k) => <i key={b.id} className={k === i ? 'on' : ''} />)}</div>
+    </div>
   );
 }
 
-function ProductScreen({ api, p, onAdd, wished, toggleWish, cartCount }: { api: AppApi; p: Product; onAdd: (pid: string, qty: number, c?: string, s?: string) => void; wished: boolean; toggleWish: (id: string) => void; cartCount: number }) {
-  const { t, lang, nav } = api;
-  const [color, setColor] = useState(p.colors?.[0]);
-  const [size, setSize] = useState<string | undefined>();
+/* --------------------------------------------------------------- product */
+
+function ProductScreen({ ctx, p }: { ctx: Ctx; p: Product }) {
+  const { t, lang, api } = ctx;
+  const [slide, setSlide] = useState(0);
+  const [color, setColor] = useState(0);
+  const [size, setSize] = useState(p.sizes ? 1 : -1);
   const [qty, setQty] = useState(1);
-  const [img, setImg] = useState(0);
-  const off = p.old ? Math.round((1 - p.price / p.old) * 100) : 0;
-  const needSize = !!p.sizes && !size;
-  const I = p.icon;
+  const [open, setOpen] = useState<string | null>('desc');
+  const [share, setShare] = useState(false);
+  const variant: L | undefined = p.colors || p.sizes
+    ? {
+        en: [p.colors?.[color]?.name.en, p.sizes?.[size]].filter(Boolean).join(' · '),
+        ar: [p.colors?.[color]?.name.ar, p.sizes?.[size]].filter(Boolean).join(' · '),
+      }
+    : undefined;
+  const shown = { ...p, color: p.colors?.[color]?.hex ?? p.color };
+  const related = products.filter((x) => x.id !== p.id).slice(0, 5);
+  const slug = p.title.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
   return (
-    <div className="sp-pd">
-      <div className="sp-scroll">
-        <div className="sp-gallery" style={{ background: p.tint }}>
-          <div className="sp-gallery-top">
-            <button className="sp-circle light" onClick={() => nav.pop()} aria-label={t('Back', 'رجوع')}>{lang === 'ar' ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}</button>
-            <div className="sp-gallery-actions">
-              <button className="sp-circle light" onClick={() => toggleWish(p.id)} aria-label={t('Save', 'حفظ')}><Heart size={19} fill={wished ? '#F26522' : 'none'} color={wished ? '#F26522' : 'currentColor'} /></button>
-              <button className="sp-circle light" onClick={() => nav.reset('cart')} aria-label={t('Cart', 'السلة')}><ShoppingCart size={19} />{cartCount > 0 && <em className="sp-cnt">{cartCount}</em>}</button>
-            </div>
+    <div className="sx-pd">
+      <div className="sx-pd-bar">
+        <button className="sx-round glass" onClick={api.nav.pop} aria-label={t('Back', 'رجوع')}><ChevronLeft size={22} className="flip-rtl" aria-hidden /></button>
+        <span className="sx-pd-bar-r">
+          <button className="sx-round glass" onClick={() => setShare(true)} aria-label={t('Share', 'مشاركة')}><Share2 size={19} aria-hidden /></button>
+          <button className="sx-round glass" onClick={() => api.nav.reset('cart')} aria-label={t('Cart', 'السلة')}>
+            <ShoppingCart size={19} aria-hidden />
+            {ctx.units > 0 && <span key={ctx.units} className="sx-badge end">{ctx.units}</span>}
+          </button>
+        </span>
+      </div>
+
+      <div className="sx-scroll pd">
+        <div className="sx-gallery">
+          <div className="sx-gallery-strip" onScroll={(e) => setSlide(Math.round(Math.abs(e.currentTarget.scrollLeft) / e.currentTarget.clientWidth))}>
+            {[0, -10, 12].map((a, k) => (
+              <div key={k} className="sx-gallery-slide">
+                <Tile p={shown} angle={a} className={`g${k}`} />
+              </div>
+            ))}
           </div>
-          <I size={150} strokeWidth={1.1} color={color?.hex && color.hex !== '#F4F4F4' ? color.hex : '#2A2F34'} style={{ transform: `rotate(${img * -8}deg) scale(${1 - img * 0.06})`, transition: 'transform .3s' }} />
-          <div className="sp-dots dark">{[0, 1, 2].map((i) => <button key={i} className={i === img ? 'on' : ''} onClick={() => setImg(i)} aria-label={`${i + 1}`} />)}</div>
+          <span className="sx-count" dir="ltr">{slide + 1} / 3</span>
         </div>
-        <div className="sp-pd-info">
-          <button className="sp-store"><Store size={14} /> {lang === 'ar' ? p.vendorAr : p.vendorEn} <ChevronRight size={14} className="flip-rtl" /></button>
-          <h1>{lang === 'ar' ? p.ar : p.en}</h1>
-          <div className="sp-rating big"><Star size={14} fill="#F9BE00" color="#F9BE00" /> {p.rating} <i>· {t(`${p.reviews} ratings`, `${p.reviews} تقييم`)}</i></div>
-          <div className="sp-pd-price">
-            <b>{egp(p.price, lang)}</b>
-            {off > 0 && <><s>{egp(p.old!, lang)}</s><span className="sp-off">-{off}%</span></>}
+
+        <div className="sx-pd-body">
+          <div className="sx-pd-meta">
+            <button className="sx-vendor" onClick={() => api.toast(t(`${p.vendor.en} has 42 products`, `${p.vendor.ar} عنده 42 منتج`))}>
+              <Store size={14} aria-hidden /> {p.vendor[lang]} <Chev size={13} />
+            </button>
+            <span className="sx-stars lg"><Star size={13} fill="#F9BE00" stroke="none" aria-hidden /> {p.rating.toFixed(1)} <small>({p.reviews})</small></span>
           </div>
-          {p.stock <= 5 && <p className="sp-low">{t(`Only ${p.stock} left in stock`, `باقي ${p.stock} بس في المخزون`)}</p>}
+          <h1 className="sx-pd-title">{p.title[lang]}</h1>
+          <Price p={p} large lang={lang} />
+          <div className="sx-pd-stock">
+            {p.stock <= 3 ? <span className="sx-bad">{t(`Only ${p.stock} left`, `باقي ${p.stock} بس`)}</span> : <span className="sx-ok"><Check size={13} aria-hidden /> {t('In stock', 'متوفر')}</span>}
+            {p.freeShipping && <span className="sx-pill"><Truck size={13} aria-hidden /> {t('Free shipping', 'شحن مجاني')}</span>}
+          </div>
 
           {p.colors && (
-            <div className="sp-opt">
-              <span>{t('Colour', 'اللون')}: <b>{lang === 'ar' ? color?.ar : color?.en}</b></span>
-              <div className="sp-swatches">
-                {p.colors.map((c) => (
-                  <button key={c.hex} className={c.hex === color?.hex ? 'on' : ''} onClick={() => setColor(c)} aria-label={c.en}><i style={{ background: c.hex }} /></button>
+            <div className="sx-opt">
+              <p>{t('Colour', 'اللون')}: <b>{p.colors[color].name[lang]}</b></p>
+              <div className="sx-swatches">
+                {p.colors.map((c, k) => (
+                  <button key={c.hex} className={k === color ? 'on' : ''} style={{ background: c.hex }} onClick={() => setColor(k)} aria-label={c.name[lang]} />
                 ))}
               </div>
             </div>
           )}
           {p.sizes && (
-            <div className="sp-opt">
-              <span>{t('Size', 'المقاس')}</span>
-              <div className="sp-sizes">
-                {p.sizes.map((s) => <button key={s} className={s === size ? 'on' : ''} onClick={() => setSize(s)}>{s}</button>)}
+            <div className="sx-opt">
+              <p>{t('Size', 'المقاس')}: <b>{p.sizes[size]}</b></p>
+              <div className="sx-sizes">
+                {p.sizes.map((s, k) => (
+                  <button key={s} className={k === size ? 'on' : ''} onClick={() => setSize(k)}>{s}</button>
+                ))}
               </div>
             </div>
           )}
-
-          <div className="sp-promise">
-            <div><Truck size={18} /> <span>{p.delivery === 'tomorrow' ? t('Get it tomorrow', 'يوصلك بكرة') : t('Delivered in 2 days', 'يوصلك خلال يومين')}<small>{t('Free over EGP 1,000', 'مجاني فوق 1,000 ج.م')}</small></span></div>
-            <div><Banknote size={18} /> <span>{t('Pay on delivery', 'الدفع عند الاستلام')}<small>{t('Cash or card to the courier', 'كاش أو كارت للمندوب')}</small></span></div>
-            <div><RotateCcw size={18} /> <span>{t('Free 14-day returns', 'إرجاع مجاني خلال 14 يوم')}<small>{t('On most items', 'على أغلب المنتجات')}</small></span></div>
+          <div className="sx-opt row">
+            <p>{t('Quantity', 'الكمية')}</p>
+            <Stepper value={qty} onChange={setQty} max={Math.min(p.stock, 9)} />
           </div>
+
+          <div className="sx-acc">
+            {[
+              { id: 'desc', title: t('Description', 'الوصف'), body: p.about[lang] },
+              { id: 'del', title: t('Delivery', 'التوصيل'), body: t('2 to 4 working days to Alexandria. Cash on delivery.', 'من 2 لـ 4 أيام عمل لإسكندرية. الدفع عند الاستلام.') },
+              { id: 'ret', title: t('Returns', 'الإرجاع'), body: t('Free returns within 14 days. A courier picks it up from your door.', 'إرجاع مجاني خلال 14 يوم. المندوب بياخده من عند بابك.') },
+            ].map((s) => (
+              <div key={s.id} className={`sx-acc-item ${open === s.id ? 'open' : ''}`}>
+                <button onClick={() => setOpen(open === s.id ? null : s.id)}>
+                  {s.title}
+                  <ChevronDown size={18} aria-hidden />
+                </button>
+                <div className="sx-acc-body"><p>{s.body}</p></div>
+              </div>
+            ))}
+          </div>
+
+          <div className="sx-trust">
+            <h4>{t('Shop with Confidence', 'تسوّق بثقة واطمئنان')}</h4>
+            <ul>
+              <li><Banknote size={18} aria-hidden /> {t('Cash on delivery', 'الدفع عند الاستلام')}</li>
+              <li><RotateCcw size={18} aria-hidden /> {t('14-day returns', 'إرجاع خلال 14 يوم')}</li>
+              <li><ShieldCheck size={18} aria-hidden /> {t('Verified vendors', 'بائعين موثّقين')}</li>
+            </ul>
+          </div>
+
+          <SectionHead title={t('You may also like', 'ممكن يعجبك كمان')} t={t} />
+        </div>
+        <div className="sx-rail">
+          {related.map((x) => <ProductCard key={x.id} ctx={ctx} p={x} />)}
+        </div>
+        <div className="sx-end pd" />
+      </div>
+
+      <div className="sx-buy">
+        <div className="sx-buy-total">
+          <small>{t('Total', 'الإجمالي')}</small>
+          <b dir="ltr">{money(p.price * qty, lang)}</b>
+        </div>
+        <div className="sx-buy-row">
+          <button className="sx-btn outline" onClick={() => { ctx.add(p.id, qty, variant); api.nav.push('checkout'); }}>{t('Buy now', 'اشترِ الآن')}</button>
+          <button className="sx-btn primary" onClick={() => ctx.add(p.id, qty, variant)}><ShoppingCart size={18} aria-hidden /> {t('Add to cart', 'أضف إلى السلة')}</button>
         </div>
       </div>
-      <div className="sp-buybar">
-        <div className="sp-qty">
-          <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="-"><Minus size={16} /></button>
-          <span>{qty}</span>
-          <button onClick={() => setQty((q) => Math.min(p.stock, q + 1))} aria-label="+"><Plus size={16} /></button>
+
+      {share && (
+        <div className="sx-sheet-wrap" onClick={() => setShare(false)}>
+          <div className="sx-sheet" onClick={(e) => e.stopPropagation()}>
+            <i className="sx-grab" />
+            <div className="sx-share-card">
+              <Tile p={shown} />
+              <span>
+                <b>{p.title[lang]}</b>
+                <span dir="ltr">{money(p.price, lang)}</span>
+                <small dir="ltr"><Link2 size={12} aria-hidden /> shopsiia.com/product/{slug}</small>
+              </span>
+            </div>
+            <p className="sx-share-note">{t('The link opens this product straight in the app, or on the web if the app is not installed.', 'اللينك بيفتح المنتج ده في التطبيق على طول، أو على الويب لو التطبيق مش متسطّب.')}</p>
+            <div className="sx-share-actions">
+              <button onClick={() => { setShare(false); api.toast(t('Link copied', 'تم نسخ اللينك')); }}><span><Copy size={20} aria-hidden /></span>{t('Copy link', 'نسخ اللينك')}</button>
+              <button onClick={() => { setShare(false); api.toast(t('Shared', 'تمت المشاركة')); }}><span><MessageCircle size={20} aria-hidden /></span>{t('Message', 'رسالة')}</button>
+              <button onClick={() => { setShare(false); api.toast(t('Shared', 'تمت المشاركة')); }}><span><Share2 size={20} aria-hidden /></span>{t('More', 'المزيد')}</button>
+            </div>
+          </div>
         </div>
-        <button
-          className="sp-cta"
-          onClick={() => {
-            if (needSize) {
-              api.toast(t('Choose a size first', 'اختار المقاس الأول'));
-              return;
-            }
-            onAdd(p.id, qty, color?.en, size);
-          }}
-        >
-          <ShoppingCart size={18} /> {t('Add to cart', 'أضف للسلة')}
-        </button>
+      )}
+    </div>
+  );
+}
+
+function Stepper({ value, onChange, max = 9, min = 1 }: { value: number; onChange: (n: number) => void; max?: number; min?: number }) {
+  return (
+    <span className="sx-stepper" dir="ltr">
+      <button onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label="-"><Minus size={15} aria-hidden /></button>
+      <b>{value}</b>
+      <button onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label="+"><Plus size={15} aria-hidden /></button>
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ cart */
+
+function CartScreen({ ctx }: { ctx: Ctx }) {
+  const { t, lang, api, lines, setLines, collapse } = ctx;
+  const all = lines.length > 0 && lines.every((l) => l.on);
+  const onCount = lines.filter((l) => l.on).length;
+  const suggestions = products.filter((p) => !lines.some((l) => l.pid === p.id)).slice(0, 5);
+
+  if (lines.length === 0) {
+    return (
+      <div className="sx-page">
+        <h1 className="sx-title">{t('Cart', 'السلة')}</h1>
+        <div className="sx-empty">
+          <span><ShoppingCart size={34} aria-hidden /></span>
+          <b>{t('Your cart is empty', 'سلتك فارغة')}</b>
+          <p>{t('Add something you like and it will wait for you here.', 'ضيف أي حاجة عجبتك وهتلاقيها مستنياك هنا.')}</p>
+          <button className="sx-btn primary" onClick={() => api.nav.reset('home')}>{t('Start shopping', 'ابدأ التسوق')}</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="sx-page">
+      <div className="sx-scroll cart" {...collapse.bind}>
+        <h1 className="sx-title">{t(`Cart (${ctx.units})`, `السلة (${ctx.units})`)}</h1>
+        <div className="sx-cart-head">
+          <button className={`sx-check ${all ? 'on' : ''}`} onClick={() => setLines((c) => c.map((l) => ({ ...l, on: !all })))}>
+            <i>{all && <Check size={13} strokeWidth={3} aria-hidden />}</i> {t('Select all', 'تحديد الكل')}
+          </button>
+          <span>{t(`${onCount} of ${lines.length} selected`, `تم تحديد ${onCount} من ${lines.length}`)}</span>
+        </div>
+        <div className="sx-lines">
+          {lines.map((l) => {
+            const p = productById(l.pid);
+            return (
+              <div key={l.key} className={`sx-line ${l.on ? '' : 'off'}`}>
+                <button className={`sx-check ${l.on ? 'on' : ''}`} onClick={() => setLines((c) => c.map((x) => (x.key === l.key ? { ...x, on: !x.on } : x)))} aria-label={t('Select', 'تحديد')}>
+                  <i>{l.on && <Check size={13} strokeWidth={3} aria-hidden />}</i>
+                </button>
+                <button className="sx-line-img" onClick={() => api.nav.push('product', { id: p.id })}><Tile p={p} /></button>
+                <div className="sx-line-body">
+                  <small>{t(`Sold by ${p.vendor.en}`, `يباع بواسطة ${p.vendor.ar}`)}</small>
+                  <b>{p.title[lang]}</b>
+                  {l.variant && <span className="sx-variant">{l.variant[lang]}</span>}
+                  <Price p={p} lang={lang} />
+                  <div className="sx-line-foot">
+                    <Stepper value={l.qty} max={Math.min(p.stock, 9)} onChange={(n) => setLines((c) => c.map((x) => (x.key === l.key ? { ...x, qty: n } : x)))} />
+                    <button className="sx-remove" onClick={() => { setLines((c) => c.filter((x) => x.key !== l.key)); api.toast(t('Removed from your cart', 'اتشال من السلة')); }} aria-label={t('Remove', 'إزالة')}>
+                      <Trash2 size={17} aria-hidden />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <p className="sx-note"><Package size={15} aria-hidden /> {t('Vendor and official stock ship separately, so one order can arrive in more than one delivery.', 'يُشحن مخزون البائعين والمخزون الرسمي بشكل منفصل، لذا قد يصل الطلب في أكثر من شحنة.')}</p>
+        <SectionHead title={t('You might like', 'ممكن يعجبك')} t={t} />
+        <div className="sx-rail">
+          {suggestions.map((p) => <ProductCard key={p.id} ctx={ctx} p={p} />)}
+        </div>
+        <div className="sx-end cart" />
       </div>
     </div>
   );
 }
 
-function Cart({ api, cart, setCart }: { api: AppApi; cart: Line[]; setCart: React.Dispatch<React.SetStateAction<Line[]>> }) {
-  const { t, lang, nav } = api;
-  const sub = subtotal(cart);
-  const ship = sub >= 1000 || sub === 0 ? 0 : 45;
-  const left = Math.max(0, 1000 - sub);
+/* -------------------------------------------------------------- checkout */
+
+function CheckoutScreen({ ctx, subtotal, saved, onPlace }: { ctx: Ctx; subtotal: number; saved: number; onPlace: () => void }) {
+  const { t, lang, lines } = ctx;
+  const [busy, setBusy] = useState(false);
+  const sel = lines.filter((l) => l.on);
+  const units = sel.reduce((s, l) => s + l.qty, 0);
   return (
-    <>
-      <header className="sp-bar"><h1 className="solo">{t('Cart', 'السلة')}</h1></header>
-      {cart.length === 0 ? (
-        <div className="sp-empty">
-          <img src={shopArt} alt="" />
-          <h2>{t('Your cart is empty', 'السلة فاضية')}</h2>
-          <p>{t('Browse deals and add something you like.', 'شوف العروض وضيف حاجة عجبتك.')}</p>
-          <button className="sp-cta" onClick={() => nav.reset('home')}>{t('Start shopping', 'ابدأ التسوق')}</button>
+    <div className="sx-page">
+      <TopBar ctx={ctx} title={t('Checkout', 'إتمام الطلب')} />
+      <div className="sx-scroll co">
+        <ol className="sx-steps">
+          <li className="done"><i><Check size={12} strokeWidth={3} aria-hidden /></i>{t('Address', 'العنوان')}</li>
+          <li className="on"><i>2</i>{t('Review', 'المراجعة')}</li>
+          <li><i>3</i>{t('Done', 'تم')}</li>
+        </ol>
+        <div className="sx-box">
+          <div className="sx-box-head"><b>{t('Deliver to', 'التوصيل إلى')}</b><button onClick={() => ctx.api.toast(t('Pick a pin on the map', 'حدد مكانك على الخريطة'))}>{t('Change', 'تغيير')}</button></div>
+          <div className="sx-addr">
+            <span className="sx-map" aria-hidden><MapPin size={22} fill="#F26522" stroke="#fff" /></span>
+            <span>
+              <b>{t('Home', 'المنزل')}</b>
+              <span>{t('14 Abu Qir St, Smouha, Alexandria', '14 شارع أبو قير، سموحة، الإسكندرية')}</span>
+              <small>{t('Matched to shipping city: Alexandria', 'مدينة الشحن: الإسكندرية')}</small>
+            </span>
+          </div>
         </div>
-      ) : (
-        <>
-          <div className="sp-scroll pad">
-            <div className={`sp-ship ${left === 0 ? 'done' : ''}`}>
-              <span>{left === 0 ? t('You unlocked free shipping', 'الشحن بقى مجاني') : t(`Add ${egp(left, 'en')} more for free shipping`, `ضيف ${egp(left, 'ar')} كمان والشحن يبقى مجاني`)}</span>
-              <i><b style={{ width: `${Math.min(100, (sub / 1000) * 100)}%` }} /></i>
-            </div>
-            {cart.map((l) => {
+        <div className="sx-box">
+          <div className="sx-box-head"><b>{t('Payment method', 'طريقة الدفع')}</b></div>
+          <div className="sx-pay">
+            <span className="sx-pay-ic"><Banknote size={20} aria-hidden /></span>
+            <span><b>{t('Cash on delivery', 'الدفع عند الاستلام')}</b><small>{t('Pay the courier when the order arrives.', 'ادفع لمندوب التوصيل عند وصول الطلب.')}</small></span>
+            <i className="sx-radio on" />
+          </div>
+        </div>
+        <div className="sx-box">
+          <div className="sx-box-head"><b>{t(`Items (${units})`, `المنتجات (${units})`)}</b></div>
+          <div className="sx-co-items">
+            {sel.map((l) => {
               const p = productById(l.pid);
               return (
-                <div key={l.key} className="sp-line">
-                  <button onClick={() => nav.push('product', { id: p.id })} className="sp-line-img"><Thumb p={p} size={36} /></button>
-                  <div className="sp-line-body">
-                    <span className="sp-vendor">{lang === 'ar' ? p.vendorAr : p.vendorEn}</span>
-                    <span className="sp-title one">{lang === 'ar' ? p.ar : p.en}</span>
-                    {(l.color || l.size) && <small>{[l.color, l.size].filter(Boolean).join(' · ')}</small>}
-                    <div className="sp-line-foot">
-                      <b>{egp(p.price * l.qty, lang)}</b>
-                      <div className="sp-qty sm">
-                        <button onClick={() => setCart((c) => c.flatMap((x) => (x.key === l.key ? (x.qty > 1 ? [{ ...x, qty: x.qty - 1 }] : []) : [x])))} aria-label="-">{l.qty > 1 ? <Minus size={14} /> : <Trash2 size={14} />}</button>
-                        <span>{l.qty}</span>
-                        <button onClick={() => setCart((c) => c.map((x) => (x.key === l.key ? { ...x, qty: x.qty + 1 } : x)))} aria-label="+"><Plus size={14} /></button>
-                      </div>
-                    </div>
-                  </div>
+                <div key={l.key} className="sx-co-item">
+                  <Tile p={p} />
+                  <span><b>{p.title[lang]}</b><small>{l.variant ? `${l.variant[lang]} · ` : ''}×{l.qty}</small></span>
+                  <b dir="ltr">{money(p.price * l.qty, lang)}</b>
                 </div>
               );
             })}
-            <Summary api={api} sub={sub} ship={ship} />
           </div>
-          <div className="sp-buybar">
-            <div className="sp-total"><small>{t('Total', 'الإجمالي')}</small><b>{egp(sub + ship, lang)}</b></div>
-            <button className="sp-cta" onClick={() => nav.push('checkout')}>{t('Checkout', 'إتمام الطلب')}</button>
-          </div>
-        </>
-      )}
-    </>
-  );
-}
-
-function Summary({ api, sub, ship }: { api: AppApi; sub: number; ship: number }) {
-  const { t, lang } = api;
-  return (
-    <div className="sp-summary">
-      <div><span>{t('Subtotal', 'المجموع')}</span><span>{egp(sub, lang)}</span></div>
-      <div><span>{t('Shipping', 'الشحن')}</span><span className={ship === 0 ? 'free' : ''}>{ship === 0 ? t('Free', 'مجاني') : egp(ship, lang)}</span></div>
-      <div className="tot"><span>{t('Total', 'الإجمالي')}</span><span>{egp(sub + ship, lang)}</span></div>
-    </div>
-  );
-}
-
-function Checkout({ api, cart, onPlace }: { api: AppApi; cart: Line[]; onPlace: () => void }) {
-  const { t, lang } = api;
-  const [pay, setPay] = useState<'cod' | 'card'>('cod');
-  const [busy, setBusy] = useState(false);
-  const sub = subtotal(cart);
-  const ship = sub >= 1000 ? 0 : 45;
-  return (
-    <>
-      <Back api={api} title={t('Checkout', 'إتمام الطلب')} />
-      <div className="sp-scroll pad">
-        <h3 className="sp-h3">{t('Delivery address', 'عنوان التوصيل')}</h3>
-        <div className="sp-box sp-addr">
-          <MapPin size={20} />
-          <div>
-            <b>{t('Home', 'البيت')}</b>
-            <p>{t('14 Victor Emmanuel St, Smouha, Alexandria', '14 شارع فيكتور عمانوئيل، سموحة، الإسكندرية')}</p>
-            <small dir="ltr">+20 10 1234 5678</small>
-          </div>
-          <span className="sp-chg">{t('Change', 'تغيير')}</span>
         </div>
-        <h3 className="sp-h3">{t('Payment method', 'طريقة الدفع')}</h3>
-        <div className="sp-box">
-          <button className={`sp-radio ${pay === 'cod' ? 'on' : ''}`} onClick={() => setPay('cod')}>
-            <CircleDot size={18} /> <span><b>{t('Pay on delivery', 'الدفع عند الاستلام')}</b><small>{t('Cash or card when it arrives', 'كاش أو كارت لما يوصلك')}</small></span>
-          </button>
-          <button className={`sp-radio ${pay === 'card' ? 'on' : ''}`} onClick={() => setPay('card')}>
-            <CircleDot size={18} /> <span><b>{t('Credit / debit card', 'كارت ائتمان')}</b><small>Visa · Mastercard · Meeza</small></span>
-          </button>
+        <button className="sx-coupon" onClick={() => ctx.api.toast(t('Try SHOPSIIA10', 'جرّب SHOPSIIA10'))}><Ticket size={18} aria-hidden /> {t('Have a code?', 'هل لديك كود خصم؟')} <Chev /></button>
+        <div className="sx-box sx-totals">
+          <p><span>{t('Items', 'المنتجات')}</span><span dir="ltr">{money(subtotal + saved, lang)}</span></p>
+          {saved > 0 && <p className="green"><span>{t('You save', 'توفّر')}</span><span dir="ltr">-{money(saved, lang)}</span></p>}
+          <p><span>{t('Shipping', 'الشحن')}</span><span className="green">{t('Free', 'مجاني')}</span></p>
+          <p className="big"><span>{t('Total', 'الإجمالي')}</span><b dir="ltr">{money(subtotal, lang)}</b></p>
         </div>
-        <h3 className="sp-h3">{t(`Items (${cart.reduce((s, l) => s + l.qty, 0)})`, `المنتجات (${cart.reduce((s, l) => s + l.qty, 0)})`)}</h3>
-        <div className="sp-box sp-mini">
-          {cart.map((l) => {
-            const p = productById(l.pid);
-            return <div key={l.key}><Thumb p={p} size={22} /><span>{l.qty} × {lang === 'ar' ? p.ar : p.en}</span></div>;
-          })}
-        </div>
-        <Summary api={api} sub={sub} ship={ship} />
-        <p className="sp-secure"><ShieldCheck size={15} /> {t('Your order is protected by Shopsiia Guarantee', 'طلبك محمي بضمان شوبسيا')}</p>
+        <div className="sx-end co" />
       </div>
-      <div className="sp-buybar">
-        <div className="sp-total"><small>{t('Total', 'الإجمالي')}</small><b>{egp(sub + ship, lang)}</b></div>
-        <button
-          className="sp-cta"
-          disabled={busy || cart.length === 0}
-          onClick={() => {
-            setBusy(true);
-            window.setTimeout(onPlace, 900);
-          }}
-        >
-          {busy ? t('Placing order…', 'جاري الطلب…') : t('Place order', 'تأكيد الطلب')}
+      <div className="sx-buy single">
+        <button className="sx-btn primary" disabled={busy || units === 0} onClick={() => { setBusy(true); window.setTimeout(onPlace, 900); }}>
+          {busy ? <span className="sx-spin" aria-hidden /> : null}
+          {busy ? t('Placing your order…', 'جارٍ تأكيد طلبك…') : t(`Place order · ${money(subtotal, 'en')}`, `تأكيد الطلب · ${money(subtotal, 'ar')}`)}
         </button>
       </div>
-    </>
-  );
-}
-
-function Placed({ api, id }: { api: AppApi; id: string }) {
-  const { t, nav } = api;
-  return (
-    <div className="sp-placed">
-      <div className="sp-check"><Check size={44} strokeWidth={3} /></div>
-      <h1>{t('Order placed', 'تم الطلب')}</h1>
-      <p>{t(`Order ${id} is with the seller now. You'll get a notification when they confirm it.`, `الأوردر ${id} وصل للبائع. هيوصلك إشعار أول ما يأكده.`)}</p>
-      <button className="sp-cta" onClick={() => { nav.reset('orders'); nav.push('tracking', { id }); }}>{t('Track order', 'تتبع الأوردر')}</button>
-      <button className="sp-ghost" onClick={() => nav.reset('home')}>{t('Continue shopping', 'كمّل تسوق')}</button>
     </div>
   );
 }
 
-const STEPS: [string, string, string, string][] = [
-  ['Order placed', 'تم الطلب', 'We received the order and notified the seller.', 'استلمنا الطلب وبلغنا البائع.'],
-  ['Confirmed', 'تم التأكيد', 'The seller accepted the order.', 'البائع قبل الطلب.'],
-  ['Packed', 'تم التغليف', 'The parcel is packed and labelled.', 'الطرد اتغلف واتلصق عليه البيانات.'],
-  ['Shipped', 'تم الشحن', 'The parcel left the seller warehouse.', 'الطرد خرج من مخزن البائع.'],
-  ['Out for delivery', 'خرج للتوصيل', 'The courier is on the way to your address.', 'المندوب في الطريق لعنوانك.'],
-  ['Delivered', 'تم التوصيل', 'The parcel was handed over.', 'الطرد اتسلم.'],
-];
-
-function statusChip(o: Order, t: AppApi['t']) {
-  if (o.cancelled) return <span className="sp-st bad">{t('Cancelled', 'ملغي')}</span>;
-  if (o.step >= 5) return <span className="sp-st ok">{t('Delivered', 'تم التوصيل')}</span>;
-  if (o.step >= 3) return <span className="sp-st go">{t('On the way', 'في الطريق')}</span>;
-  return <span className="sp-st">{t('In progress', 'جاري التجهيز')}</span>;
-}
-
-function Orders({ api, orders }: { api: AppApi; orders: Order[] }) {
-  const { t, lang, nav } = api;
+function PlacedScreen({ ctx, id }: { ctx: Ctx; id: string }) {
+  const { t, api } = ctx;
   return (
-    <>
-      <header className="sp-bar"><h1 className="solo">{t('My orders', 'طلباتي')}</h1></header>
-      <div className="sp-scroll pad">
-        {orders.map((o) => (
-          <button key={o.id} className="sp-order" onClick={() => nav.push('tracking', { id: o.id })}>
-            <div className="sp-order-top">
-              <b dir="ltr">{o.id}</b>
-              {statusChip(o, t)}
-            </div>
-            <div className="sp-order-thumbs">{o.lines.map((l) => <Thumb key={l.key} p={productById(l.pid)} size={22} />)}</div>
-            <div className="sp-order-foot">
-              <span>{o.date.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' })} · {egp(o.total, lang)}</span>
-              {!o.cancelled && o.step < 5 && <span className="sp-progress"><i style={{ width: `${(o.step / 5) * 100}%` }} /></span>}
-            </div>
-          </button>
-        ))}
+    <div className="sx-page sx-placed">
+      <span className="sx-placed-ic"><CircleCheck size={56} aria-hidden /></span>
+      <h1>{t('Order placed', 'تم تأكيد الطلب')}</h1>
+      <p>{t('Your order is confirmed and split between its vendors.', 'تم تأكيد طلبك وتقسيمه بين البائعين.')}</p>
+      <span className="sx-chip" dir="ltr">{id}</span>
+      <div className="sx-placed-btns">
+        <button className="sx-btn primary" onClick={() => api.nav.replace('tracking', { id })}>{t('Track order', 'تتبع الطلب')}</button>
+        <button className="sx-btn outline" onClick={() => api.nav.reset('home')}>{t('Continue shopping', 'متابعة التسوق')}</button>
       </div>
-    </>
+    </div>
   );
 }
 
-function Tracking({ api, order, onCancel }: { api: AppApi; order: Order; onCancel: (id: string) => void }) {
-  const { t, lang } = api;
-  const [ask, setAsk] = useState(false);
-  return (
-    <>
-      <Back api={api} title={t('Order tracking', 'تتبع الأوردر')} />
-      <div className="sp-scroll pad">
-        <div className="sp-box sp-track-head">
-          <div>
-            <small>{t('Order', 'أوردر')}</small>
-            <b dir="ltr">{order.id}</b>
-          </div>
-          {statusChip(order, t)}
-        </div>
-        {!order.cancelled && order.step < 5 && (
-          <div className="sp-eta">
-            <Truck size={20} />
-            <span>{t('Estimated delivery', 'ميعاد التوصيل المتوقع')}<b>{order.step >= 4 ? t('Today, by 6 PM', 'النهارده قبل 6 م') : t('Arrives in 1–2 days', 'يوصل خلال 1–2 يوم')}</b></span>
-          </div>
-        )}
-        <ol className="sp-timeline">
-          {STEPS.map((s, i) => {
-            const state = order.cancelled ? (i === 0 ? 'done' : 'todo') : i < order.step ? 'done' : i === order.step ? 'now' : 'todo';
-            return (
-              <li key={s[0]} className={state}>
-                <i>{state === 'done' && <Check size={12} strokeWidth={3} />}</i>
-                <div>
-                  <b>{lang === 'ar' ? s[1] : s[0]}</b>
-                  {state !== 'todo' && <small>{lang === 'ar' ? s[3] : s[2]}</small>}
-                </div>
-              </li>
-            );
-          })}
-        </ol>
-        <div className="sp-box sp-mini">
-          {order.lines.map((l) => {
-            const p = productById(l.pid);
-            return <div key={l.key}><Thumb p={p} size={22} /><span>{l.qty} × {lang === 'ar' ? p.ar : p.en}</span></div>;
-          })}
-          <div className="sp-mini-total"><span>{t('Order total', 'إجمالي الأوردر')}</span><b>{egp(order.total, lang)}</b></div>
-        </div>
-        {!order.cancelled && order.step < 3 && (
-          ask ? (
-            <div className="sp-box sp-confirm">
-              <b>{t('Cancel this order?', 'تلغي الأوردر ده؟')}</b>
-              <p>{t('Nothing has shipped yet, so the whole order will be cancelled.', 'لسه محدش شحن حاجة، فالأوردر كله هيتلغي.')}</p>
-              <div>
-                <button className="sp-ghost" onClick={() => setAsk(false)}>{t('Keep order', 'سيب الأوردر')}</button>
-                <button className="sp-cta danger" onClick={() => { onCancel(order.id); setAsk(false); api.toast(t('Your order has been cancelled.', 'الأوردر اتلغى.')); }}>{t('Yes, cancel it', 'أيوه ألغيه')}</button>
-              </div>
-            </div>
-          ) : (
-            <button className="sp-ghost wide" onClick={() => setAsk(true)}>{t('Cancel order', 'إلغاء الأوردر')}</button>
-          )
-        )}
-      </div>
-    </>
-  );
-}
-
-function SearchScreen({ api }: { api: AppApi }) {
-  const { t, lang, nav } = api;
-  const [q, setQ] = useState('');
-  const recent = lang === 'ar' ? ['سماعة', 'ساعة ذكية', 'حذاء'] : ['headphones', 'smart watch', 'shoes'];
-  const res = q.trim() ? products.filter((p) => (p.en + ' ' + p.ar + ' ' + p.vendorEn).toLowerCase().includes(q.trim().toLowerCase())) : [];
-  const Chevron = lang === 'ar' ? ChevronRight : ChevronLeft;
-  return (
-    <>
-      <header className="sp-bar sp-searchbar">
-        <button className="sp-icon-btn" onClick={() => nav.pop()} aria-label={t('Back', 'رجوع')}><Chevron size={22} /></button>
-        <label className="sp-search in">
-          <Search size={17} />
-          <input id="sp-search-input" autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search products', 'دوّر على منتج')} />
-          {q && <button onClick={() => setQ('')} aria-label="clear"><X size={16} /></button>}
-        </label>
-      </header>
-      <div className="sp-scroll pad">
-        {!q && (
-          <>
-            <h3 className="sp-h3">{t('Recent searches', 'آخر عمليات بحث')}</h3>
-            <div className="sp-recent">{recent.map((r) => <button key={r} onClick={() => setQ(r)}>{r}</button>)}</div>
-          </>
-        )}
-        {q && res.length === 0 && <p className="sp-noresult">{t(`No results for "${q}"`, `مفيش نتايج لـ "${q}"`)}</p>}
-        {res.length > 0 && <p className="sp-count">{t(`${res.length} results`, `${res.length} نتيجة`)}</p>}
-        <div className="sp-grid">{res.map((p) => <ProductCard key={p.id} api={api} p={p} />)}</div>
-      </div>
-    </>
-  );
-}
-
-function Account({ api }: { api: AppApi }) {
-  const { t } = api;
-  const rows: [typeof Globe, string][] = [
-    [Package, t('My orders', 'طلباتي')],
-    [MapPin, t('Addresses', 'العناوين')],
-    [Heart, t('Saved items', 'المحفوظات')],
-    [Globe, t('Language', 'اللغة')],
-    [Moon, t('Appearance', 'المظهر')],
-    [Store, t('Sell on Shopsiia', 'بيع على شوبسيا')],
-    [HelpCircle, t('Help & support', 'المساعدة والدعم')],
+function TrackingScreen({ ctx, order }: { ctx: Ctx; order: Order }) {
+  const { t } = ctx;
+  const steps = [
+    t('Order confirmed', 'تم تأكيد الطلب'),
+    t('Packed by the vendor', 'البائع جهّز الطلب'),
+    t('Shipped', 'اتشحن'),
+    t('Out for delivery', 'خرج للتوصيل'),
+    t('Delivered', 'تم التسليم'),
   ];
   return (
-    <>
-      <header className="sp-bar"><h1 className="solo">{t('Account', 'حسابي')}</h1></header>
-      <div className="sp-scroll pad">
-        <div className="sp-guest">
-          <div className="sp-avatar"><User size={26} /></div>
-          <div>
-            <b>{t('Browsing as a guest', 'بتتصفح كضيف')}</b>
-            <p>{t('Your cart is kept and moves to your account when you sign in.', 'السلة محفوظة وهتتنقل لحسابك لما تسجل دخول.')}</p>
-          </div>
+    <div className="sx-page">
+      <TopBar ctx={ctx} title={t('Track order', 'تتبع الطلب')} />
+      <div className="sx-scroll co">
+        <div className="sx-box sx-track-head">
+          <span><small>{t('Order', 'طلب')}</small><b dir="ltr">{order.id}</b></span>
+          <span><small>{t('Arriving', 'يصل')}</small><b>{order.step >= 4 ? t('Delivered', 'تم التسليم') : order.step >= 3 ? t('Today by 6 PM', 'النهارده قبل 6 م') : t('Tomorrow', 'بكرة')}</b></span>
         </div>
-        <button className="sp-cta wide" onClick={() => api.toast(t('Sign-in is turned off in the demo', 'تسجيل الدخول مقفول في الديمو'))}><LogIn size={18} /> {t('Sign in or create account', 'سجل دخول أو اعمل حساب')}</button>
-        <div className="sp-list">
-          {rows.map(([I, label]) => (
-            <button key={label} onClick={() => (label === t('My orders', 'طلباتي') ? api.nav.reset('orders') : api.toast(t('Not part of the demo', 'مش متاحة في الديمو')))}>
-              <I size={19} /> <span>{label}</span> <ChevronRight size={16} className="flip-rtl" />
-            </button>
-          ))}
+        <div className="sx-box">
+          <ol className="sx-timeline">
+            {steps.map((s, k) => (
+              <li key={s} className={k < order.step ? 'done' : k === order.step ? 'now' : ''}>
+                <i>{k <= order.step && <Check size={12} strokeWidth={3} aria-hidden />}</i>
+                <span><b>{s}</b>{k <= order.step && <small><Clock size={11} aria-hidden /> {k === order.step ? t('Just now', 'الآن') : t(`${(order.step - k) * 5}h ago`, `من ${(order.step - k) * 5} ساعات`)}</small>}</span>
+              </li>
+            ))}
+          </ol>
         </div>
+        <div className="sx-box sx-courier">
+          <span className="sx-avatar">MA</span>
+          <span><b>{t('Mahmoud, your courier', 'محمود، المندوب')}</b><small>{t(`Collect ${money(order.total, 'en')} on delivery`, `هتدفع ${money(order.total, 'ar')} عند الاستلام`)}</small></span>
+          <button className="sx-round soft" onClick={() => ctx.api.toast(t('Calling…', 'بيتصل…'))} aria-label={t('Call', 'اتصال')}><Phone size={18} aria-hidden /></button>
+        </div>
+        <p className="sx-note"><RotateCcw size={15} aria-hidden /> {t('After delivery you can return any item from this page within 14 days.', 'بعد الاستلام تقدر ترجّع أي منتج من الصفحة دي خلال 14 يوم.')}</p>
       </div>
-    </>
+    </div>
   );
 }
 
-function Inbox({ api }: { api: AppApi }) {
-  const { t } = api;
-  const items = [
-    [Truck, t('Your order SH-10482 has shipped', 'الأوردر SH-10482 اتشحن'), t('2h ago', 'من ساعتين'), 'tracking'],
-    [Banknote, t('Flash deal: 24% off the espresso machine', 'عرض سريع: خصم 24% على ماكينة الإسبريسو'), t('Yesterday', 'امبارح'), 'product'],
-    [Check, t('Order SH-10311 was delivered', 'الأوردر SH-10311 اتسلم'), t('12 days ago', 'من 12 يوم'), 'tracking2'],
-  ] as const;
+/* --------------------------------------------------------------- support */
+
+function FaqTile({ q, a, open, onToggle }: { q: string; a: string; open: boolean; onToggle: () => void }) {
   return (
-    <>
-      <Back api={api} title={t('Notifications', 'الإشعارات')} />
-      <div className="sp-scroll pad">
-        {items.map(([I, title, when, to]) => (
-          <button key={title} className="sp-inbox" onClick={() => (to === 'product' ? api.nav.push('product', { id: 'p6' }) : api.nav.push('tracking', { id: to === 'tracking' ? 'SH-10482' : 'SH-10311' }))}>
-            <span className="sp-inbox-ic"><I size={18} /></span>
-            <span><b>{title}</b><small>{when}</small></span>
+    <div className={`sx-faq ${open ? 'open' : ''}`}>
+      <button onClick={onToggle} aria-expanded={open}>
+        <span>{q}</span>
+        <ChevronDown size={18} aria-hidden />
+      </button>
+      <div className="sx-acc-body"><p>{a}</p></div>
+    </div>
+  );
+}
+
+function SupportScreen({ ctx, unread }: { ctx: Ctx; unread: number }) {
+  const { t, lang, api, collapse } = ctx;
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <div className="sx-page">
+      <div className="sx-scroll tab" {...collapse.bind}>
+        <h1 className="sx-title">{t('Help & support', 'المساعدة والدعم')}</h1>
+        <div className="sx-help">
+          <h3>{t('How can we help?', 'كيف يمكننا مساعدتك؟')}</h3>
+          <button className="sx-chat-cta" onClick={() => api.nav.push('chat')}>
+            <span className="sx-chat-ic"><MessageCircle size={22} aria-hidden /></span>
+            <span><b>{t('Chat with us', 'تحدّث معنا')}</b><small>{unread > 0 ? t('1 new reply from the team', 'رد جديد من الفريق') : t('Fastest way to reach the team', 'أسرع وسيلة للتواصل مع الفريق')}</small></span>
+            {unread > 0 && <i className="sx-unread">{unread}</i>}
+            <Chev />
           </button>
+        </div>
+        <SectionHead title={t('Common questions', 'أسئلة شائعة')} onAll={() => api.nav.push('faqs')} t={t} />
+        <div className="sx-faqs">
+          {faqs.slice(0, 5).map((f, k) => (
+            <FaqTile key={k} q={f.q[lang]} a={f.a[lang]} open={open === k} onToggle={() => setOpen(open === k ? null : k)} />
+          ))}
+        </div>
+        <SectionHead title={t('Other ways to reach us', 'طرق أخرى للتواصل')} t={t} />
+        <div className="sx-list">
+          <button onClick={() => api.toast(t('Calling support…', 'بيتصل بالدعم…'))}><Phone size={19} aria-hidden /> {t('Call support', 'اتصل بالدعم')} <Chev /></button>
+          <button onClick={() => api.toast(t('Opening your email app…', 'بيفتح تطبيق الإيميل…'))}><Mail size={19} aria-hidden /> {t('Email support', 'راسل الدعم')} <Chev /></button>
+        </div>
+        <div className="sx-end" />
+      </div>
+    </div>
+  );
+}
+
+function FaqsScreen({ ctx }: { ctx: Ctx }) {
+  const { t, lang } = ctx;
+  const [q, setQ] = useState('');
+  const [open, setOpen] = useState<number | null>(null);
+  const list = faqs.map((f, k) => ({ ...f, k })).filter((f) => !q || (f.q[lang] + f.a[lang]).toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div className="sx-page">
+      <TopBar ctx={ctx} title={t('Common questions', 'أسئلة شائعة')} />
+      <div className="sx-scroll co">
+        <label className="sx-field">
+          <Search size={18} aria-hidden />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search the questions', 'ابحث في الأسئلة')} />
+        </label>
+        <div className="sx-faqs">
+          {list.map((f) => <FaqTile key={f.k} q={f.q[lang]} a={f.a[lang]} open={open === f.k} onToggle={() => setOpen(open === f.k ? null : f.k)} />)}
+          {list.length === 0 && <p className="sx-muted">{t('No matching questions', 'لا توجد أسئلة مطابقة')}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChatScreen({ ctx, msgs, onSend }: { ctx: Ctx; msgs: Msg[]; onSend: (s: string) => void }) {
+  const { t } = ctx;
+  const [text, setText] = useState('');
+  const end = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }, [msgs.length]);
+  const send = (s: string) => {
+    onSend(s);
+    setText('');
+  };
+  return (
+    <div className="sx-page sx-chat">
+      <header className="sx-top">
+        <button className="sx-round" onClick={ctx.api.nav.pop} aria-label={t('Back', 'رجوع')}><ChevronLeft size={22} className="flip-rtl" aria-hidden /></button>
+        <span className="sx-chat-who">
+          <span className="sx-avatar y">S</span>
+          <span><b>{t('Shopsiia Support', 'دعم شوبسيا')}</b><small><i /> {t('Online · replies in minutes', 'متصل · بيرد خلال دقايق')}</small></span>
+        </span>
+      </header>
+      <div className="sx-msgs">
+        <p className="sx-day">{t('Today', 'النهارده')}</p>
+        {msgs.map((m) => (
+          <div key={m.id} className={`sx-msg ${m.from}`}>
+            {m.text === '…typing' ? <span className="sx-typing"><i /><i /><i /></span> : m.text}
+          </div>
+        ))}
+        <div ref={end} />
+      </div>
+      <div className="sx-quick">
+        {[t('Where is my order?', 'طلبي فين؟'), t('Return an item', 'عايز أرجّع منتج')].map((q) => (
+          <button key={q} onClick={() => send(q)}>{q}</button>
         ))}
       </div>
-    </>
+      <form className="sx-composer" onSubmit={(e) => { e.preventDefault(); send(text); }}>
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder={t('Type a message', 'اكتب رسالة')} />
+        <button type="submit" aria-label={t('Send', 'إرسال')}><Send size={18} className="flip-rtl" aria-hidden /></button>
+      </form>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- offers */
+
+function OffersScreen({ ctx }: { ctx: Ctx }) {
+  const { t, lang, collapse } = ctx;
+  const [cat, setCat] = useState('all');
+  const deals = products.filter((p) => discount(p) > 0).sort((a, b) => discount(b) - discount(a));
+  const chips = [{ id: 'all', en: 'All', ar: 'الكل' }, ...categories.slice(0, 5)];
+  return (
+    <div className="sx-page">
+      <div className="sx-scroll tab" {...collapse.bind}>
+        <h1 className="sx-title">{t('Offers', 'العروض')}</h1>
+        <p className="sx-subtitle">{t('Live deals from every vendor, refreshed daily', 'عروض من كل البائعين، تُحدَّث يوميًا')}</p>
+        <div className="sx-chips">
+          {chips.map((c) => <button key={c.id} className={cat === c.id ? 'on' : ''} onClick={() => setCat(c.id)}>{c[lang]}</button>)}
+        </div>
+        <div className="sx-deal">
+          <span>
+            <small>{t('Ends in', 'ينتهي خلال')}</small>
+            <b dir="ltr">05 : 42 : 18</b>
+          </span>
+          <span className="sx-deal-art"><ProductArt kind="watch" color="#F26522" angle={-10} /></span>
+        </div>
+        <SectionHead title={t('Biggest discounts', 'أكبر الخصومات')} t={t} />
+        <div className="sx-grid">
+          {deals.map((p) => <ProductCard key={p.id} ctx={ctx} p={p} wide />)}
+        </div>
+        <div className="sx-end" />
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------------------------------------- account */
+
+function AccountScreen({ ctx, orders }: { ctx: Ctx; orders: Order[] }) {
+  const { t, api, dark, collapse, lang } = ctx;
+  const [push, setPush] = useState(true);
+  return (
+    <div className="sx-page">
+      <div className="sx-scroll tab" {...collapse.bind}>
+        <h1 className="sx-title">{t('Account', 'حسابي')}</h1>
+        <div className="sx-guest">
+          <span className="sx-avatar big"><CircleUserGlyph /></span>
+          <span><b>{t('Guest', 'زائر')}</b><small>{t('Sign in to track orders and save addresses', 'سجّل الدخول لتتبّع طلباتك وحفظ عناوينك')}</small></span>
+          <button className="sx-btn primary sm" onClick={() => api.toast(t('Your cart comes with you when you sign in', 'سلتك هتتنقل معاك لما تسجل دخول'))}>{t('Sign in', 'دخول')}</button>
+        </div>
+        <div className="sx-free"><Truck size={18} aria-hidden /> {t('You have free shipping on your next order', 'لديك شحن مجاني على طلبك القادم')}</div>
+
+        <p className="sx-group">{t('Essentials', 'الأساسيات')}</p>
+        <div className="sx-list">
+          <button onClick={() => api.nav.push('tracking', { id: orders[0].id })}><Package size={19} aria-hidden /> {t('My orders', 'طلباتي')} <em>{t(`Arriving: ${orders[0].id}`, `يصل: ${orders[0].id}`)}</em> <Chev /></button>
+          <button onClick={() => api.toast(t('Addresses are saved on the map', 'العناوين بتتحفظ على الخريطة'))}><MapPin size={19} aria-hidden /> {t('Addresses', 'العناوين')} <Chev /></button>
+          <button onClick={() => api.nav.push('support')}><MessageCircle size={19} aria-hidden /> {t('Help & support', 'المساعدة والدعم')} <Chev /></button>
+        </div>
+
+        <p className="sx-group">{t('Preferences', 'التفضيلات')}</p>
+        <div className="sx-list">
+          <div className="sx-row">
+            {dark ? <Moon size={19} aria-hidden /> : <Sun size={19} aria-hidden />} {t('Appearance', 'المظهر')}
+            <span className="sx-seg" role="radiogroup">
+              <button role="radio" aria-checked={!dark} className={!dark ? 'on' : ''} onClick={() => api.setFlag('dark', false)}>{t('Light', 'فاتح')}</button>
+              <button role="radio" aria-checked={dark} className={dark ? 'on' : ''} onClick={() => api.setFlag('dark', true)}>{t('Dark', 'داكن')}</button>
+            </span>
+          </div>
+          <button onClick={() => api.toast(t('Switch language from the panel beside the phone', 'غيّر اللغة من اللوحة اللي جنب الموبايل'))}>
+            <Languages size={19} aria-hidden /> {t('Language', 'اللغة')} <em>{lang === 'ar' ? 'العربية' : 'English'}</em> <Chev />
+          </button>
+          <div className="sx-row">
+            <BellRing size={19} aria-hidden /> {t('Notifications', 'الإشعارات')}
+            <button className={`sx-switch ${push ? 'on' : ''}`} role="switch" aria-checked={push} onClick={() => setPush(!push)} aria-label={t('Notifications', 'الإشعارات')}><i /></button>
+          </div>
+        </div>
+
+        <button className="sx-sell" onClick={() => api.toast(t('Applications open', 'التقديم متاح'))}>
+          <Store size={22} aria-hidden />
+          <span><b>{t('Sell with Shopsiia', 'بِع مع شوبسيا')}</b><small>{t('Apply to sell your products to shoppers across Egypt', 'قدّم طلبًا وابدأ بيع منتجاتك لعملاء في كل مصر')}</small></span>
+          <Chev />
+        </button>
+        <p className="sx-copy">{t('© 2026 Shopsiia. All rights reserved.', '© 2026 شوبسيا. جميع الحقوق محفوظة.')}</p>
+        <div className="sx-end" />
+      </div>
+    </div>
+  );
+}
+
+const CircleUserGlyph = () => (
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+    <circle cx="12" cy="9" r="4" />
+    <path d="M4.5 20c1.5-3.5 4.2-5 7.5-5s6 1.5 7.5 5" strokeLinecap="round" />
+  </svg>
+);
+
+/* ---------------------------------------------------------------- search */
+
+function SearchScreen({ ctx }: { ctx: Ctx }) {
+  const { t, lang, api, mini } = ctx;
+  const cat = String(api.nav.route.params?.q ?? '');
+  const [q, setQ] = useState('');
+  const catDef = categories.find((c) => c.id === cat);
+  const results = products.filter((p) => {
+    if (catDef && p.kind !== catDef.art && !(catDef.id === 'electronics' && ['earbuds', 'watch', 'headphones'].includes(p.kind))) return false;
+    if (!q) return true;
+    return (p.title.en + ' ' + p.title.ar + ' ' + p.vendor.en).toLowerCase().includes(q.toLowerCase());
+  });
+  return (
+    <div className="sx-page">
+      <header className="sx-top">
+        <button className="sx-round" onClick={api.nav.pop} aria-label={t('Back', 'رجوع')}><ChevronLeft size={22} className="flip-rtl" aria-hidden /></button>
+        <label className="sx-field grow">
+          <Search size={18} aria-hidden />
+          <input autoFocus={!mini} value={q} onChange={(e) => setQ(e.target.value)} placeholder={catDef ? catDef[lang] : t('Search products', 'ابحث عن منتجات')} />
+          {q && <button type="button" onClick={() => setQ('')} aria-label={t('Clear', 'مسح')}><X size={16} aria-hidden /></button>}
+        </label>
+      </header>
+      <div className="sx-scroll co">
+        {!q && !catDef && (
+          <>
+            <p className="sx-group">{t('Popular right now', 'الأكثر بحثًا دلوقتي')}</p>
+            <div className="sx-chips wrap">
+              {[t('Earbuds', 'سماعات'), t('Sneakers', 'كوتشي'), t('Watch', 'ساعة'), t('Oud', 'عود'), t('Backpack', 'شنطة')].map((s) => (
+                <button key={s} onClick={() => setQ(s)}>{s}</button>
+              ))}
+            </div>
+          </>
+        )}
+        <p className="sx-group">{t(`${results.length} results`, `${results.length} نتيجة`)}</p>
+        <div className="sx-grid">
+          {results.map((p) => <ProductCard key={p.id} ctx={ctx} p={p} wide />)}
+        </div>
+        {results.length === 0 && <p className="sx-muted">{t('No products match. Try other words.', 'مفيش منتجات مطابقة. جرّب كلمات تانية.')}</p>}
+      </div>
+    </div>
   );
 }

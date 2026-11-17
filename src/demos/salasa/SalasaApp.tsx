@@ -4,7 +4,7 @@ import {
   CheckCircle2, Clock, AlertTriangle, Trophy, ChevronLeft, ChevronRight, Check, Bell, Moon, Globe, Shield, LogOut, Trash2,
 } from 'lucide-react';
 import type { AppApi } from '../../shell/types';
-import logo from '../../assets/icons/salasa.png';
+import logo from '../../assets/icons/salasa.webp';
 import './salasa.css';
 
 type Status = 'lead' | 'contacted' | 'won' | 'lost';

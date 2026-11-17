@@ -4,7 +4,7 @@ import {
   MicOff, VideoOff, PhoneOff, Volume2, CheckCheck, Plus, MapPin, Camera,
 } from 'lucide-react';
 import type { AppApi } from '../../shell/types';
-import logo from '../../assets/icons/magchat.png';
+import logo from '../../assets/icons/magchat.webp';
 import './lets.css';
 
 interface Msg {

@@ -1,11 +1,11 @@
-// import shopsiiaIcon from './assets/icons/shopsiia.png'; // HIDDEN: Shopsiia
-import salasaIcon from './assets/icons/salasa.png';
-import letsIcon from './assets/icons/magchat.png';
-import homecarIcon from './assets/icons/homecar.png';
-import taqyIcon from './assets/icons/taqy.png';
-import perfumeIcon from './assets/icons/perfume.png';
-import rent2goIcon from './assets/icons/rent2go.png';
-import carfiIcon from './assets/icons/cargo.png';
+import shopsiiaIcon from './assets/icons/shopsiia.webp';
+import salasaIcon from './assets/icons/salasa.webp';
+import letsIcon from './assets/icons/magchat.webp';
+import homecarIcon from './assets/icons/homecar.webp';
+import taqyIcon from './assets/icons/taqy.webp';
+import perfumeIcon from './assets/icons/perfume.webp';
+import rent2goIcon from './assets/icons/rent2go.webp';
+import carfiIcon from './assets/icons/cargo.webp';
 
 type L = { en: string; ar: string };
 
@@ -25,6 +25,8 @@ export const profile = {
 export interface Project {
   id: string;
   name: string;
+  /** Full heading on the project card; the index uses the short name. */
+  title?: string;
   icon: string;
   kind: L;
   summary: L;
@@ -41,38 +43,41 @@ export interface Project {
 }
 
 export const projects: Project[] = [
-  // HIDDEN for now: Shopsiia. To show it again, remove the /* */ around this block,
-  // and uncomment the Shopsiia lines in src/main.tsx and src/site/Site.tsx.
-  /*
   {
     id: 'shopsiia',
     name: 'Shopsiia',
+    title: 'Shopsiia — Multi-Vendor E-commerce App (Flutter · iOS & Android)',
     icon: shopsiiaIcon,
-    kind: { en: 'Multi-vendor marketplace', ar: 'سوق إلكتروني متعدد البائعين' },
+    kind: { en: 'Multi-vendor e-commerce', ar: 'تجارة إلكترونية متعددة البائعين' },
     summary: {
-      en: 'A shopping app where customers buy from many sellers in one cart, pay on delivery, and follow each parcel to their door.',
-      ar: 'تطبيق تسوق العميل فيه بيشتري من أكتر من بائع في سلة واحدة، ويدفع عند الاستلام، ويتابع كل طرد لحد باب البيت.',
+      en: 'A marketplace where shoppers buy from many vendors in one cart, pay on delivery and follow every parcel to their door.',
+      ar: 'سوق إلكتروني العميل فيه بيشتري من بائعين كتير في سلة واحدة، ويدفع عند الاستلام، ويتابع كل طرد لحد باب البيت.',
     },
     points: {
       en: [
-        'Full commerce journey: categories, search with filters, product variants, cart, checkout, order tracking and returns',
-        'Guest-first: shoppers browse and fill a cart without an account; the cart moves to their account when they sign in',
-        'Arabic and English with full right-to-left layout, plus light and dark themes',
-        'In-memory caching that answers repeat screens instantly and merges duplicate requests',
+        'Built and shipped a multi-vendor marketplace to the App Store and Google Play, owning the full app.',
+        'Full commerce journey: browsing, search & filters, variants, cart, COD checkout, order tracking, and returns, with a guest cart that merges on sign-in.',
+        'Clean Architecture with Cubit and go_router, covered by 3,000+ unit, widget, and golden tests.',
+        'Real-time support chat over WebSockets, push notifications, and product deep links with offline handling.',
+        'Map-based addresses matched to shipping cities; Arabic/English (RTL/LTR) and light/dark themes.',
+        'CI/CD via GitHub Actions to TestFlight, with Shorebird OTA patches.',
       ],
       ar: [
-        'رحلة شراء كاملة: أقسام، بحث بفلاتر، اختيارات للمنتج، سلة، دفع، تتبع أوردر ومرتجعات',
-        'تقدر تتصفح وتملا السلة من غير حساب، والسلة بتتنقل لحسابك أول ما تسجل دخول',
-        'عربي وإنجليزي بتصميم كامل من اليمين للشمال، ووضع فاتح وغامق',
-        'كاش في الذاكرة بيفتح الشاشات المتكررة فورًا وبيدمج الطلبات المكررة',
+        'بنيت ونشرت سوق إلكتروني متعدد البائعين على App Store و Google Play، ومسؤول عن التطبيق بالكامل.',
+        'رحلة شراء كاملة: تصفح، وبحث وفلاتر، واختيارات للمنتج، وسلة، ودفع عند الاستلام، وتتبع الطلب، ومرتجعات، مع سلة للزائر بتندمج أول ما يسجل دخول.',
+        'Clean Architecture مع Cubit و go_router، ومغطّى بأكتر من 3,000 اختبار unit و widget و golden.',
+        'شات دعم لحظي بالـ WebSockets، وإشعارات، ولينكات للمنتجات بتفتح في التطبيق، مع التعامل مع انقطاع النت.',
+        'عناوين من الخريطة بتتربط بمدن الشحن؛ عربي وإنجليزي (RTL/LTR) ووضع فاتح وداكن.',
+        'CI/CD بـ GitHub Actions لحد TestFlight، وتحديثات OTA بـ Shorebird.',
       ],
     },
-    stack: ['Flutter', 'Cubit', 'Clean Architecture', 'go_router', 'get_it DI', 'Dio interceptors', 'Token refresh', 'LRU cache', 'Secure Storage', 'RTL / i18n', 'Maps & geocoding', 'FCM', 'Firebase Analytics', 'Shorebird OTA'],
+    stack: ['Flutter', 'Dart', 'Cubit', 'Clean Architecture', 'WebSockets', 'FCM', 'Deep Linking', 'Google Maps', 'GitHub Actions', 'Shorebird'],
     role: { en: 'Freelance · sole developer', ar: 'فريلانس · المطور الوحيد' },
+    play: 'https://play.google.com/store/apps/details?id=com.amb.shopsiia',
+    appStore: 'https://apps.apple.com/us/app/shopsiia/id6806533353',
     demo: 'shopsiia',
-    status: 'demo',
+    status: 'live',
   },
-  */
   {
     id: 'lets',
     name: "Let's",
@@ -215,12 +220,12 @@ export const experience = [
     note: { en: 'Remote · sole developer on client apps', ar: 'عن بُعد · المطور الوحيد في تطبيقات العملاء' },
     points: {
       en: [
-        'Building a multi-vendor marketplace for Android and iOS, from the first commit to release',
+        'Built and shipped Shopsiia, a multi-vendor marketplace, to the App Store and Google Play, from the first commit to release',
         'Taking client apps from design files to the stores: architecture, API integration, payments and notifications',
         'Owning the full delivery: estimates, weekly builds on TestFlight, store submissions and support after launch',
       ],
       ar: [
-        'ببني سوق إلكتروني متعدد البائعين على Android و iOS، من أول commit لحد الإطلاق',
+        'بنيت ونشرت Shopsiia، سوق إلكتروني متعدد البائعين، على App Store و Google Play، من أول commit لحد الإطلاق',
         'باخد تطبيقات العملاء من ملفات التصميم لحد الستور: المعمارية وربط الـ APIs والدفع والإشعارات',
         'مسؤول عن التسليم كله: التقدير، ونسخ أسبوعية على TestFlight، والرفع على الستور، والدعم بعد الإطلاق',
       ],

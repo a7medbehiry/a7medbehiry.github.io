@@ -1821,3 +1821,14 @@
     text-align: center;
   }
 }
+
+.pcard-h3-sub {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--f-body, Inter, system-ui, sans-serif);
+  font-size: 0.42em;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--muted, #555);
+}

@@ -5,15 +5,15 @@ import {
 } from 'lucide-react';
 import type { Lang } from '../shell/types';
 import { handled, alsoShipped, certGroups, featuredCerts, experienceCertUrl, experience, faq, processSteps, profile, projects, services, skills, writing } from '../content';
-// import { shopsiiaDemo } from '../demos/shopsiia'; // HIDDEN: Shopsiia
+import { shopsiiaDemo } from '../demos/shopsiia';
 import { salasaDemo } from '../demos/salasa';
 import { letsDemo } from '../demos/lets';
 import { MiniPhone } from './MiniPhone';
 import { tech, PlayMark, AppleMark } from './TechIcons';
-import photo from '../assets/photo.jpg';
-import cs50Img from '../assets/certs/cs50.jpg';
-import perfImg from '../assets/certs/performance.jpg';
-import bestImg from '../assets/certs/best-employee.jpg';
+import photo from '../assets/photo.webp';
+import cs50Img from '../assets/certs/cs50.webp';
+import perfImg from '../assets/certs/performance.webp';
+import bestImg from '../assets/certs/best-employee.webp';
 
 const certImg = { cs50: cs50Img, performance: perfImg, 'best-employee': bestImg };
 const issuerTint: Record<string, string> = { Udemy: '#a435f0', Harvard: '#a51c30', ITI: '#c8102e', Udacity: '#02b3e4', Cisco: '#049fd9', Anthropic: '#d97757', SoloLearn: '#1d8a5b', TeraCourses: '#10b04a', 'Cognitive Class': '#3b6fd8', 'Misr Public Library': '#7a5c2e' };
@@ -21,14 +21,15 @@ import './site.css';
 
 const T = (lang: Lang) => (en: string, ar: string) => (lang === 'ar' ? ar : en);
 
-const carousel = [
-  // { demo: shopsiiaDemo, route: { name: 'home' } }, // HIDDEN: Shopsiia
+const carousel: { demo: typeof letsDemo; route: { name: string; params?: Record<string, string> }; flags?: Record<string, boolean> }[] = [
+  { demo: shopsiiaDemo, route: { name: 'home' } },
   { demo: salasaDemo, route: { name: 'clients' } },
-  { demo: salasaDemo, route: { name: 'dashboard' } },
   { demo: letsDemo, route: { name: 'list' } },
-  // { demo: shopsiiaDemo, route: { name: 'product', params: { id: 'p1' } } }, // HIDDEN: Shopsiia
-  { demo: letsDemo, route: { name: 'qr' } },
+  { demo: shopsiiaDemo, route: { name: 'cart' }, flags: { dark: true } },
+  { demo: salasaDemo, route: { name: 'dashboard' } },
   { demo: letsDemo, route: { name: 'chat', params: { id: 'nada' } } },
+  { demo: shopsiiaDemo, route: { name: 'product', params: { id: 'p1' } } },
+  { demo: letsDemo, route: { name: 'qr' } },
   { demo: salasaDemo, route: { name: 'followups' } },
 ];
 
@@ -40,7 +41,7 @@ const panel: Record<string, string> = {
   taqy: 'linear-gradient(150deg,#ffe1dc,#f26b5b)',
   perfume: 'linear-gradient(150deg,#ffd9bf,#f2732a)',
 };
-const demoFor: Record<string, typeof letsDemo> = { /* shopsiia: shopsiiaDemo, */ salasa: salasaDemo, lets: letsDemo }; // HIDDEN: Shopsiia
+const demoFor: Record<string, typeof letsDemo> = { shopsiia: shopsiiaDemo, salasa: salasaDemo, lets: letsDemo };
 const demoRoute: Record<string, { name: string; params?: Record<string, string> }> = {
   shopsiia: { name: 'home' },
   salasa: { name: 'dashboard' },
@@ -125,8 +126,8 @@ function Hero({ lang }: { lang: Lang }) {
         <p className="hero-name">{profile.name[lang]} · {profile.location[lang]}</p>
         <p className="hero-lede">
           {t(
-            'I build Android and iOS apps that ship to the stores and hold up in production: e-commerce, real-time chat and calls, on-demand services and business tools. Two of them run right here, so you can try them before we talk.',
-            'ببني تطبيقات Android و iOS بتتنشر على الستور وبتشتغل كويس في الإنتاج: تجارة إلكترونية، وشات ومكالمات لحظية، وخدمات عند الطلب، وأدوات بيزنس. واتنين منهم شغالين هنا، تقدر تجربهم قبل ما نتكلم.',
+            'I build Android and iOS apps that ship to the stores and hold up in production: e-commerce, real-time chat and calls, on-demand services and business tools. Three of them run right here, so you can try them before we talk.',
+            'ببني تطبيقات Android و iOS بتتنشر على الستور وبتشتغل كويس في الإنتاج: تجارة إلكترونية، وشات ومكالمات لحظية، وخدمات عند الطلب، وأدوات بيزنس. وتلاتة منهم شغالين هنا، تقدر تجربهم قبل ما نتكلم.',
           )}
         </p>
         <div className="hero-actions">
@@ -218,7 +219,7 @@ function Services({ lang }: { lang: Lang }) {
 
 function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }) {
   const t = T(lang);
-  const [i, setI] = useState(2);
+  const [i, setI] = useState(0);
   const touchX = useRef(0);
   const n = carousel.length;
   const [w, setW] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1200));
@@ -233,7 +234,7 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
     <section className="latest" id="projects">
       <SecHead
         title={t('Try It Live', 'جرّبها بنفسك')}
-        sub={t('Interactive versions of two of my Flutter apps, running in your browser with sample data. Tap the phone in the middle to start.', 'نسخ تفاعلية من تطبيقين Flutter عملتهم، شغالة في المتصفح ببيانات تجريبية. دوس على الموبايل اللي في النص وابدأ.')}
+        sub={t('Interactive versions of three of my Flutter apps, running in your browser with sample data. Tap the phone in the middle to start.', 'نسخ تفاعلية من تلات تطبيقات Flutter عملتها، شغالة في المتصفح ببيانات تجريبية. دوس على الموبايل اللي في النص وابدأ.')}
       />
       <div className="car" dir="ltr">
         <button className="car-arrow l" onClick={() => setI((i - 1 + n) % n)} aria-label={t('Previous', 'السابق')}><ChevronLeft size={18} /></button>
@@ -262,7 +263,7 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
                 onClick={() => (d === 0 ? openDemo(c.demo.id) : setI(k))}
                 aria-label={d === 0 ? t(`Open the ${c.demo.name} demo`, `افتح ديمو ${c.demo.name}`) : c.demo.name}
               >
-                <MiniPhone demo={c.demo} route={c.route} lang={lang} width={base} />
+                <MiniPhone demo={c.demo} route={c.route} lang={lang} width={base} flags={c.flags} />
                 {d === 0 && <span className="car-cta"><Play size={13} aria-hidden /> {t('Try it live', 'جرّبه دلوقتي')}</span>}
               </button>
             );
@@ -316,7 +317,7 @@ function Work({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void }
             <article key={p.id} id={`p-${p.id}`} ref={(el) => (refs.current[p.id] = el)} className="pcard">
               <div className="pcard-body">
                 <p className="pcard-kind"><i aria-hidden /> {p.kind[lang]}</p>
-                <h3>{p.name}</h3>
+                <h3>{p.name}{p.title && p.title.startsWith(p.name) && <span className="pcard-h3-sub">{p.title.slice(p.name.length)}</span>}</h3>
                 <p className="pcard-sum">{p.summary[lang]}</p>
                 <ul className="pcard-points">{p.points[lang].map((x) => <li key={x}>{x}</li>)}</ul>
                 <ul className="pcard-stack">{p.stack.map((s) => <li key={s}>{s}</li>)}</ul>
