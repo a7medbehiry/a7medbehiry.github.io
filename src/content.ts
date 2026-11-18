@@ -424,3 +424,15 @@ export const alsoShipped: { name: string; icon: string; kind: L }[] = [
   { name: 'Car-Fi User', icon: carfiIcon, kind: { en: 'Car services', ar: 'خدمات العربيات' } },
   { name: 'Car-Fi Owner', icon: carfiIcon, kind: { en: 'Service provider app', ar: 'تطبيق مقدم الخدمة' } },
 ];
+
+/**
+ * Keep hyphenated words whole when a line wraps ("sign-in", "real-time"):
+ * swap the hyphen for a non-breaking one in the copy, never in links or files.
+ */
+const keepWhole = (v: unknown): unknown => {
+  if (typeof v === 'string') return /^(https?:|data:|\/|\.|mailto:)/.test(v) ? v : v.replace(/(\p{L})-(\p{L})/gu, '$1‑$2');
+  if (Array.isArray(v)) { v.forEach((x, i) => (v[i] = keepWhole(x))); return v; }
+  if (v && typeof v === 'object') { for (const k of Object.keys(v)) if (!/^(id|icon|img|image|url|play|appStore|web|demo|link|href|issuerUrl|cert)$/.test(k)) (v as Record<string, unknown>)[k] = keepWhole((v as Record<string, unknown>)[k]); return v; }
+  return v;
+};
+[profile, projects, experience, skills, writing, services, processSteps, handled, featuredCerts, certGroups, faq, alsoShipped].forEach(keepWhole);

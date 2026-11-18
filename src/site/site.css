@@ -1832,3 +1832,12 @@
   letter-spacing: 0;
   color: var(--muted, #555);
 }
+
+/* No lone word on the last line of a paragraph or list item. */
+.site p,
+.site li,
+.site dd,
+.site blockquote,
+.site .pcard-h3-sub {
+  text-wrap: pretty;
+}

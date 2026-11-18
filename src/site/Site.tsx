@@ -22,15 +22,16 @@ import './site.css';
 const T = (lang: Lang) => (en: string, ar: string) => (lang === 'ar' ? ar : en);
 
 const carousel: { demo: typeof letsDemo; route: { name: string; params?: Record<string, string> }; flags?: Record<string, boolean> }[] = [
+  // Centre: Shopsiia. Right: Let's. Left (wraps from the end): Salasa.
   { demo: shopsiiaDemo, route: { name: 'home' } },
-  { demo: salasaDemo, route: { name: 'clients' } },
   { demo: letsDemo, route: { name: 'list' } },
-  { demo: shopsiiaDemo, route: { name: 'cart' }, flags: { dark: true } },
-  { demo: salasaDemo, route: { name: 'dashboard' } },
   { demo: letsDemo, route: { name: 'chat', params: { id: 'nada' } } },
+  { demo: shopsiiaDemo, route: { name: 'cart' }, flags: { dark: true } },
   { demo: shopsiiaDemo, route: { name: 'product', params: { id: 'p1' } } },
   { demo: letsDemo, route: { name: 'qr' } },
   { demo: salasaDemo, route: { name: 'followups' } },
+  { demo: salasaDemo, route: { name: 'clients' } },
+  { demo: salasaDemo, route: { name: 'dashboard' } },
 ];
 
 const panel: Record<string, string> = {
@@ -276,7 +277,7 @@ function Latest({ lang, openDemo }: { lang: Lang; openDemo: (id: string) => void
 
       <dl className="stats" id="stats">
         <div><dt>3<sup>+</sup></dt><dd>{t('Years in Flutter', 'سنين في Flutter')}</dd></div>
-        <div><dt>15<sup>+</sup></dt><dd>{t('Apps live on the stores', 'تطبيق منشور على الستور')}</dd></div>
+        <div><dt>16<sup>+</sup></dt><dd>{t('Apps live on the stores', 'تطبيق منشور على الستور')}</dd></div>
         <div><dt>25<sup>+</sup></dt><dd>{t('Flutter apps worked on', 'تطبيق Flutter اشتغلت عليه')}</dd></div>
         <div><dt>{Object.keys(demoFor).length}</dt><dd>{t('Live demos', 'ديموهات مباشرة')}</dd></div>
       </dl>
